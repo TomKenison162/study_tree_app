@@ -67,10 +67,11 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:14 }}>
+        <form onSubmit={handleSubmit} noValidate style={{ display:'flex', flexDirection:'column', gap:14 }}>
           <input
-            type="email" placeholder="Email address" value={email}
+            type="text" placeholder="Email or username" value={email}
             onChange={e => setEmail(e.target.value)} required
+            autoComplete="email"
             style={fieldStyle}
           />
           <input

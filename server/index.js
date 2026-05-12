@@ -44,8 +44,9 @@ app.post('/api/auth/register', async (req, res) => {
 
 app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
-  const userRow = queries.getUserByEmail.get(email);
+  if (!email || !password) return res.status(400).json({ error: 'Email or username and password required' });
+  // Accept email or username in the email field
+  const userRow = queries.getUserByEmail.get(email) || queries.getUserByUsername.get(email);
   if (!userRow) return res.status(401).json({ error: 'Invalid credentials' });
   const valid = await bcrypt.compare(password, userRow.password_hash);
   if (!valid) return res.status(401).json({ error: 'Invalid credentials' });

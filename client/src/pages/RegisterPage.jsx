@@ -67,27 +67,25 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:14 }}>
-          <div>
-            <input
-              type="text" placeholder="Username (2-30 chars)" value={username}
-              onChange={e => setUsername(e.target.value)} required
-              minLength={2} maxLength={30}
-              style={fieldStyle}
-            />
-          </div>
+        <form onSubmit={handleSubmit} noValidate style={{ display:'flex', flexDirection:'column', gap:14 }}>
           <input
-            type="email" placeholder="Email address" value={email}
-            onChange={e => setEmail(e.target.value)} required
+            type="text" placeholder="Username (2–30 characters)" value={username}
+            onChange={e => setUsername(e.target.value)} required
+            autoComplete="username"
             style={fieldStyle}
           />
-          <div>
-            <input
-              type="password" placeholder="Password (min 6 chars)" value={password}
-              onChange={e => setPassword(e.target.value)} required minLength={6}
-              style={fieldStyle}
-            />
-          </div>
+          <input
+            type="text" placeholder="Email address" value={email}
+            onChange={e => setEmail(e.target.value)} required
+            autoComplete="email"
+            style={fieldStyle}
+          />
+          <input
+            type="password" placeholder="Password (min 6 characters)" value={password}
+            onChange={e => setPassword(e.target.value)} required minLength={6}
+            autoComplete="new-password"
+            style={fieldStyle}
+          />
 
           {error && (
             <div style={{

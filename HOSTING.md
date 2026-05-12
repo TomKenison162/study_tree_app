@@ -27,19 +27,21 @@ Open http://localhost:3001
 1. Push to GitHub
 2. Go to [railway.app](https://railway.app) → New Project → Deploy from GitHub
 3. Select your repo
-4. Set **Root Directory** = `/` and **Start command** = `npm start`
-5. Add env vars:
-   - `JWT_SECRET` = any long random string
-   - `PORT` = `3001` (Railway sets this automatically)
-6. Done — Railway builds and deploys automatically
+4. Set these in Railway's service settings:
+   - **Build command**: `npm install --prefix server && npm run build`
+   - **Start command**: `npm start`
+5. Add env var: `JWT_SECRET` = any long random string (Railway sets `PORT` automatically)
+6. Add a **Volume** mounted at `/app/server` so `data.db` persists across deploys
+7. Done — Railway builds and deploys automatically
 
 ## Deploy to Render
 
 1. Push to GitHub
 2. New Web Service at [render.com](https://render.com)
-3. Build command: `npm run install:all && npm run build`
-4. Start command: `npm start`
+3. **Build command**: `npm install --prefix server && npm run build`
+4. **Start command**: `npm start`
 5. Set `JWT_SECRET` environment variable
+6. Add a Render Disk mounted at `/opt/render/project/src/server` for database persistence
 
 ## Environment variables
 
