@@ -66,10 +66,10 @@ function TreeCard({ session, index }) {
           zIndex:10,
         }}>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6, fontSize:10, fontFamily:sans, color:ink2 }}>
-            <span>🌱 {session.cards_fresh} fresh</span>
-            <span>🔄 {session.cards_review} review</span>
-            <span>↩️ {session.redos} redos</span>
-            <span>🕐 {formatTime(session.completed_at)}</span>
+            <span>{session.cards_fresh} fresh</span>
+            <span>{session.cards_review} review</span>
+            <span>{session.redos} redos</span>
+            <span>{formatTime(session.completed_at)}</span>
           </div>
         </div>
       )}

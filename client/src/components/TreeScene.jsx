@@ -1,147 +1,120 @@
 import React from 'react';
 import {
   buildBlobs, TWIG_DASH, TWIGS, FINE_TWIG_DASH, FINE_TWIGS,
-  RAYS, LEAVES, GLOW_ORBS, WILDFLOWERS, DRIFT_LEAVES, STARS,
-  FIREFLIES, BUTTERFLIES,
+  WILDFLOWERS,
 } from './treeTypes.jsx';
 
 const c01 = (v, a, b) => Math.max(0, Math.min(1, (v - a) / (b - a)));
 
 /* ─────────────────────── PINE TREE ─────────────────────── */
-function PineTree({ progress, theme, sunAngleNorm, sunHeight, duskOp, dayOp, rimLightOp, nightOp }) {
-  const trP  = c01(progress, 0.00, 0.14);
-  const t0P  = c01(progress, 0.06, 0.20);
-  const t1P  = c01(progress, 0.14, 0.28);
-  const t2P  = c01(progress, 0.22, 0.38);
-  const t3P  = c01(progress, 0.32, 0.48);
-  const t4P  = c01(progress, 0.42, 0.58);
-  const t5P  = c01(progress, 0.52, 0.68);
-  const t6P  = c01(progress, 0.62, 0.78);
-  const detP = c01(progress, 0.55, 0.85);
-  const tr   = 'transform 1.2s cubic-bezier(0.34,1.4,0.64,1)';
-
-  // 7 tiers: [apexY, baseY, halfWidth]
+function PineTree({ progress, theme, sunAngleNorm, sunHeight, duskOp, rimLightOp, nightOp }) {
+  const trP = c01(progress, 0.00, 0.13);
+  const tr  = 'transform 1.3s cubic-bezier(0.34,1.4,0.64,1)';
+  // tiers grow TOP → BOTTOM, each spreading outward from the trunk (scaleX)
   const TIERS = [
-    [85,  170, 42,  t0P],
-    [125, 218, 58,  t1P],
-    [170, 272, 75,  t2P],
-    [222, 332, 94,  t3P],
-    [280, 398, 114, t4P],
-    [345, 468, 136, t5P],
-    [415, 524, 160, t6P],
+    { apex:88,  base:172, hw:44,  p: c01(progress,0.06,0.20) },
+    { apex:128, base:220, hw:60,  p: c01(progress,0.14,0.29) },
+    { apex:174, base:276, hw:78,  p: c01(progress,0.22,0.38) },
+    { apex:226, base:338, hw:98,  p: c01(progress,0.31,0.47) },
+    { apex:284, base:404, hw:119, p: c01(progress,0.40,0.57) },
+    { apex:350, base:472, hw:142, p: c01(progress,0.50,0.67) },
+    { apex:420, base:524, hw:164, p: c01(progress,0.60,0.77) },
   ];
+  const detP = c01(progress, 0.55, 0.85);
 
-  function tierPath(apex, base, hw) {
+  // Natural pine tier: slight droop at branch tips
+  function tier(apex, base, hw) {
     const cx = 300;
-    const ctrl = apex + (base - apex) * 0.6;
-    return `M${cx},${apex} C${cx - hw*0.32},${ctrl} ${cx - hw*0.76},${base - 12} ${cx - hw},${base} L${cx + hw},${base} C${cx + hw*0.76},${base - 12} ${cx + hw*0.32},${ctrl} ${cx},${apex} Z`;
-  }
-
-  function tierHighlightPath(apex, base, hw) {
-    const cx = 300;
-    return `M${cx},${apex} C${cx + hw*0.1},${apex + 20} ${cx + hw*0.5},${base - 30} ${cx + hw*0.7},${base - 8} L${cx + hw},${base} C${cx + hw*0.76},${base - 12} ${cx + hw*0.32},${apex + (base-apex)*0.6} ${cx},${apex} Z`;
+    const h  = base - apex;
+    const cy = apex + h * 0.62;      // bezier control Y
+    const dp = h * 0.07;             // tip droop
+    return `M${cx},${apex} `
+      + `C${cx-hw*0.18},${cy} ${cx-hw*0.74},${base} ${cx-hw},${base+dp} `
+      + `Q${cx},${base+dp*0.5} ${cx+hw},${base+dp} `
+      + `C${cx+hw*0.74},${base} ${cx+hw*0.18},${cy} ${cx},${apex} Z`;
   }
 
   const shadowDx = -sunAngleNorm * 38;
-  const shadowStretchX = 1 + Math.abs(sunAngleNorm) * 0.5;
-  const shadowOp = 0.08 + (1 - sunHeight) * 0.04;
+  const shadowSX = 1 + Math.abs(sunAngleNorm) * 0.5;
 
   return (
     <>
+      {/* Ground shadow */}
+      <ellipse cx={300+shadowDx} cy="524" rx={65*shadowSX} ry={5.5-sunHeight*1.2}
+        fill={`rgba(20,12,4,${0.07+(1-sunHeight)*0.04})`}
+        style={{ transition:'cx 4s,rx 4s,ry 4s', filter:'blur(2px)' }}/>
       {/* Roots */}
       <path d="M294,520 C272,508 250,518 230,528" stroke="#3a1808" strokeWidth="9" strokeLinecap="round" fill="none" strokeDasharray="72" strokeDashoffset={72*(1-trP)} style={{ transition:tr }}/>
       <path d="M306,522 C330,510 354,520 372,528" stroke="#3a1808" strokeWidth="9" strokeLinecap="round" fill="none" strokeDasharray="72" strokeDashoffset={72*(1-trP)} style={{ transition:tr }}/>
+      {/* Trunk — behind tiers */}
+      <path d="M296,524 C296,460 297,350 298,200 C298,150 299,110 299,88"
+        stroke="#3a1808" strokeWidth="13" strokeLinecap="round" fill="none"
+        strokeDasharray="438" strokeDashoffset={438*(1-trP)} style={{ transition:tr }}/>
 
-      {/* Tree shadow */}
-      <ellipse cx={300 + shadowDx} cy="524" rx={70 * shadowStretchX} ry={6 - sunHeight * 1.5}
-        fill={`rgba(20,12,4,${shadowOp})`}
-        style={{ transition:'cx 4s,rx 4s,ry 4s,fill 4s', filter:`blur(2px)` }}/>
+      {/* ── TIERS: each spreads horizontally (scaleX) from trunk centre ── */}
+      {TIERS.map(({ apex, base, hw, p }, i) => (
+        <g key={i}
+           style={{ transform:`scaleX(${p})`, transformOrigin:`300px ${apex}px`,
+                    transition:'transform 1.35s cubic-bezier(0.34,1.45,0.64,1)' }}>
+          {/* Deep shadow backing */}
+          <path d={tier(apex+6, base+5, hw*1.06)} fill={theme.leafDark} opacity={0.6}/>
+          {/* Main tier */}
+          <path d={tier(apex, base, hw)} fill={theme.leafDark}/>
+          {/* Mid-tone band */}
+          <path d={tier(apex+4, base-4, hw*0.70)} fill={theme.leafMid} opacity={0.94}/>
+          {/* Light upper accent */}
+          <path d={tier(apex+9, base-14, hw*0.44)} fill={theme.leafLight} opacity={0.76}/>
+          {/* Sun-side rim */}
+          {rimLightOp > 0.08 && (
+            <path d={tier(apex, base, hw*0.30)}
+              fill={duskOp>0.5?'#ffd080':'#e8ffa8'}
+              opacity={rimLightOp*0.42}
+              style={{ transform:`translateX(${sunAngleNorm*hw*0.07}px)`, transition:'transform 4s' }}/>
+          )}
+          {/* Night overlay */}
+          {nightOp > 0.18 && (
+            <path d={tier(apex, base, hw)} fill="rgba(8,16,44,0.52)" opacity={nightOp*0.8}/>
+          )}
+          {/* Snow on top 2 tiers near completion */}
+          {progress > 0.88 && i < 2 && (
+            <path d={tier(apex, apex+(base-apex)*0.26, hw*0.34)}
+              fill="rgba(232,246,255,0.90)" opacity={0.9*p}/>
+          )}
+        </g>
+      ))}
 
-      {/* Trunk */}
-      <path d="M296,524 L296,420 L296,320 L297,200 L298,120 L299,90"
-        stroke="#3a1808" strokeWidth="14" strokeLinecap="round" fill="none"
-        strokeDasharray="440" strokeDashoffset={440*(1-trP)} style={{ transition:tr }}/>
-      <path d="M302,524 L302,420 L302,320 L302,200 L302,120 L302,90"
-        stroke="#6a4020" strokeWidth="5" strokeLinecap="round" fill="none" opacity="0.55"
-        strokeDasharray="440" strokeDashoffset={440*(1-trP)} style={{ transition:tr }}/>
+      {/* Trunk stripe rendered OVER tiers so it stays visible */}
+      <path d="M298,524 C298,460 299,350 299,200 C299,150 299,110 299,88"
+        stroke="#6a4020" strokeWidth="4" strokeLinecap="round" fill="none" opacity="0.55"
+        strokeDasharray="438" strokeDashoffset={438*(1-trP)} style={{ transition:tr }}/>
 
-      {/* Bark texture */}
-      <g opacity={detP * 0.45} style={{ transition:'opacity 1.5s' }}>
-        {[120,180,240,310,380,455].map((y, i) => (
+      {/* Bark ridges */}
+      <g opacity={detP*0.4} style={{ transition:'opacity 1.5s' }}>
+        {[130,190,260,340,420].map(y => (
           <React.Fragment key={y}>
-            <path d={`M296,${y} Q295,${y+18} 297,${y+36}`} stroke="#1a0804" strokeWidth="0.7" fill="none" strokeLinecap="round"/>
-            <path d={`M302,${y+10} Q303,${y+28} 301,${y+48}`} stroke="#1a0804" strokeWidth="0.6" fill="none" strokeLinecap="round"/>
+            <path d={`M296,${y} Q295,${y+15} 297,${y+30}`} stroke="#1a0804" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+            <path d={`M302,${y+8} Q303,${y+22} 301,${y+38}`} stroke="#1a0804" strokeWidth="0.6" fill="none" strokeLinecap="round"/>
           </React.Fragment>
         ))}
       </g>
 
-      {/* Horizontal branch stubs at each tier */}
-      {TIERS.map(([apex, base, hw, p], i) => {
-        const brY = apex + (base - apex) * 0.7;
-        const brLen = hw * 0.55;
-        return (
-          <g key={`br${i}`} opacity={p} style={{ transition:'opacity 1.2s' }}>
-            <path d={`M296,${brY} L${296 - brLen},${brY + 8}`} stroke="#3a1808" strokeWidth={2.5 - i*0.2} strokeLinecap="round" fill="none"/>
-            <path d={`M304,${brY} L${304 + brLen},${brY + 8}`} stroke="#3a1808" strokeWidth={2.5 - i*0.2} strokeLinecap="round" fill="none"/>
-          </g>
-        );
-      })}
-
-      {/* Tier layers — each has shadow + mid + highlight */}
-      {TIERS.map(([apex, base, hw, p], i) => {
-        const sunShift = sunAngleNorm * hw * 0.12;
-        return (
-          <g key={`tier${i}`}
-            style={{ transform:`scaleY(${p})`, transformOrigin:`300px ${apex}px`, transition:'transform 1.0s cubic-bezier(0.34,1.2,0.64,1)' }}>
-            {/* Shadow under-layer */}
-            <path d={tierPath(apex + 4, base + 3, hw + 4)} fill={theme.leafDark} opacity="0.55"/>
-            {/* Main tier */}
-            <path d={tierPath(apex, base, hw)} fill={theme.leafDark}/>
-            {/* Mid highlight */}
-            <path d={tierPath(apex + 2, base - 6, hw * 0.8)} fill={theme.leafMid} opacity="0.9"/>
-            {/* Sun-side edge glow */}
-            {rimLightOp > 0.1 && (
-              <path d={tierHighlightPath(apex, base, hw)}
-                fill={duskOp > 0.5 ? '#ffd49a' : '#f0ffa0'}
-                opacity={rimLightOp * 0.35}
-                style={{ transform:`translateX(${sunShift}px)`, transition:'transform 4s,opacity 4s' }}/>
-            )}
-            {/* Top light accent */}
-            <path d={tierPath(apex, apex + (base - apex)*0.38, hw * 0.52)}
-              fill={theme.leafLight} opacity="0.7"/>
-            {/* Snow cap on top tiers when near completion */}
-            {progress > 0.85 && i < 3 && (
-              <path d={tierPath(apex, apex + (base-apex)*0.25, hw * 0.28)}
-                fill="rgba(240,248,255,0.88)" opacity={0.7 * p}/>
-            )}
-          </g>
-        );
-      })}
-
-      {/* Tip star */}
-      {t0P > 0.8 && (
-        <g opacity={t0P * detP} style={{ transition:'opacity 1s' }}>
+      {/* Crown tip star (fully grown) */}
+      {detP > 0.6 && (
+        <g opacity={detP*0.85} style={{ transition:'opacity 1s' }}>
           {[0,60,120,180,240,300].map(deg => {
-            const r = deg * Math.PI / 180;
-            return <line key={deg} x1="299" y1="82" x2={299+Math.cos(r)*7} y2={82+Math.sin(r)*7}
-              stroke={theme.leafLight} strokeWidth="1.2" strokeLinecap="round" opacity="0.8"/>;
+            const r = deg*Math.PI/180;
+            return <line key={deg} x1="299" y1="84" x2={299+Math.cos(r)*8} y2={84+Math.sin(r)*8}
+              stroke={theme.leafLight} strokeWidth="1.5" strokeLinecap="round" opacity="0.85"/>;
           })}
-          <circle cx="299" cy="82" r="2.5" fill={theme.leafLight} opacity="0.9"/>
+          <circle cx="299" cy="84" r="3" fill={theme.leafLight} opacity="0.95"/>
         </g>
       )}
-
-      {/* Night rim shadows */}
-      {nightOp > 0.2 && TIERS.map(([apex, base, hw, p], i) => (
-        <path key={`ns${i}`} d={tierPath(apex, base, hw)}
-          fill="rgba(15,25,55,0.4)" opacity={nightOp * 0.5 * p}
-          style={{ transform:`scaleY(${p})`, transformOrigin:`300px ${apex}px`, transition:'transform 1s,opacity 4s' }}/>
-      ))}
     </>
   );
 }
 
 /* ─────────────────────── BONSAI TREE ─────────────────────── */
-function BonsaiTree({ progress, theme, sunAngleNorm, sunHeight, duskOp, dayOp, rimLightOp, nightOp }) {
+function BonsaiTree({ progress, theme, sunAngleNorm, sunHeight, duskOp, rimLightOp, nightOp }) {
   const potP  = c01(progress, 0.00, 0.12);
   const trP   = c01(progress, 0.06, 0.22);
   const brP   = c01(progress, 0.16, 0.38);
@@ -154,19 +127,26 @@ function BonsaiTree({ progress, theme, sunAngleNorm, sunHeight, duskOp, dayOp, r
   const tr    = 'transform 1.2s cubic-bezier(0.34,1.4,0.64,1)';
   const shadowDx = -sunAngleNorm * 38;
 
+  // Cloud puffs: each is a cluster of overlapping circles for an organic look
+  // Groups: left cluster (p1), right cluster (p2), centre cluster (p3/p4)
   const puffs = [
-    { cx:208, cy:398, rx:38, ry:24, col: theme.leafDark,  p: p1P },
-    { cx:222, cy:378, rx:28, ry:18, col: theme.leafMid,   p: p1P },
-    { cx:195, cy:385, rx:24, ry:16, col: theme.leafDark,  p: p1P },
-    { cx:210, cy:365, rx:20, ry:13, col: theme.leafLight, p: p1P },
-    { cx:392, cy:388, rx:34, ry:22, col: theme.leafDark,  p: p2P },
-    { cx:408, cy:370, rx:26, ry:17, col: theme.leafMid,   p: p2P },
-    { cx:378, cy:380, rx:22, ry:15, col: theme.leafDark,  p: p2P },
-    { cx:395, cy:358, rx:18, ry:12, col: theme.leafLight, p: p2P },
-    { cx:298, cy:398, rx:30, ry:19, col: theme.leafMid,   p: p3P },
-    { cx:300, cy:380, rx:24, ry:16, col: theme.leafLight, p: p3P },
-    { cx:290, cy:368, rx:18, ry:12, col: theme.leafMid,   p: p3P },
-    { cx:305, cy:358, rx:14, ry:9,  col: theme.leafLight, p: p4P },
+    // Left cluster — 5 overlapping circles
+    { cx:202, cy:400, r:28, col:theme.leafDark,  p:p1P },
+    { cx:220, cy:386, r:22, col:theme.leafMid,   p:p1P },
+    { cx:188, cy:388, r:20, col:theme.leafDark,  p:p1P },
+    { cx:212, cy:370, r:17, col:theme.leafLight, p:p1P },
+    { cx:198, cy:375, r:14, col:theme.leafMid,   p:p1P },
+    // Right cluster
+    { cx:390, cy:392, r:26, col:theme.leafDark,  p:p2P },
+    { cx:405, cy:376, r:20, col:theme.leafMid,   p:p2P },
+    { cx:374, cy:382, r:19, col:theme.leafDark,  p:p2P },
+    { cx:396, cy:362, r:16, col:theme.leafLight, p:p2P },
+    // Centre top cluster
+    { cx:298, cy:400, r:22, col:theme.leafMid,   p:p3P },
+    { cx:300, cy:383, r:18, col:theme.leafLight, p:p3P },
+    { cx:290, cy:370, r:15, col:theme.leafMid,   p:p3P },
+    { cx:308, cy:360, r:12, col:theme.leafLight, p:p4P },
+    { cx:295, cy:354, r:10, col:theme.leafLight, p:p4P },
   ];
 
   return (
@@ -225,19 +205,19 @@ function BonsaiTree({ progress, theme, sunAngleNorm, sunHeight, duskOp, dayOp, r
         stroke="#5a3018" strokeWidth="4" strokeLinecap="round" fill="none"
         strokeDasharray="22" strokeDashoffset={22*(1-brP)} style={{ transition:tr }}/>
 
-      {/* Canopy puffs */}
+      {/* Canopy cloud-puffs — circles for organic look */}
       {puffs.map((pf, i) => (
         <g key={i} style={{ transform:`scale(${pf.p})`, transformOrigin:`${pf.cx}px ${pf.cy}px`, transition:trSlow }}>
-          <ellipse cx={pf.cx} cy={pf.cy} rx={pf.rx} ry={pf.ry} fill={pf.col}/>
+          <circle cx={pf.cx} cy={pf.cy} r={pf.r} fill={pf.col}/>
           {rimLightOp > 0.1 && (
-            <ellipse cx={pf.cx + sunAngleNorm * pf.rx * 0.4} cy={pf.cy - sunHeight * pf.ry * 0.4}
-              rx={pf.rx * 0.38} ry={pf.ry * 0.3}
+            <circle cx={pf.cx + sunAngleNorm * pf.r * 0.4} cy={pf.cy - sunHeight * pf.r * 0.4}
+              r={pf.r * 0.35}
               fill={duskOp > 0.5 ? '#ffd49a' : '#fff4c4'}
-              opacity={rimLightOp * 0.4}
+              opacity={rimLightOp * 0.38}
               style={{ filter:'blur(2px)', transition:'cx 4s,cy 4s,opacity 4s' }}/>
           )}
           {nightOp > 0.2 && (
-            <ellipse cx={pf.cx} cy={pf.cy} rx={pf.rx} ry={pf.ry}
+            <circle cx={pf.cx} cy={pf.cy} r={pf.r}
               fill="rgba(20,30,70,0.45)" opacity={nightOp * 0.6}/>
           )}
         </g>
@@ -253,7 +233,7 @@ function BonsaiTree({ progress, theme, sunAngleNorm, sunHeight, duskOp, dayOp, r
 }
 
 /* ─────────────────────── BIRCH TRUNK (deciduous variant) ─────────────────────── */
-function BirchTrunk({ progress, tP, detailP, tr, rimLightOp, duskOp, dayOp, sunAngleNorm, rimLightX }) {
+function BirchTrunk({ tP, detailP, tr, rimLightOp, duskOp, sunAngleNorm, rimLightX }) {
   return (
     <>
       {/* Roots */}
@@ -265,7 +245,7 @@ function BirchTrunk({ progress, tP, detailP, tr, rimLightOp, duskOp, dayOp, sunA
       <path d="M300,524 C298,462 305,398 296,330 C290,269 298,214 294,152 C290,116 298,96 298,72" stroke="#e8e0d4" strokeWidth="26" strokeLinecap="round" fill="none" strokeDasharray="552" strokeDashoffset={552*(1-tP)} style={{ transition:tr }}/>
       <path d="M308,524 C307,462 310,398 306,330 C304,269 308,214 306,152 C305,122 307,102 307,80" stroke="#c0b8b0" strokeWidth="6" strokeLinecap="round" fill="none" opacity="0.4" strokeDasharray="450" strokeDashoffset={450*(1-tP)} style={{ transition:tr }}/>
 
-      {/* Characteristic birch bark markings (dark horizontal marks) */}
+      {/* Characteristic birch bark horizontal marks */}
       <g opacity={detailP * 0.9} style={{ transition:'opacity 1.5s' }}>
         {[490,455,418,385,350,312,275,238,205,172,138].map((y, i) => (
           <React.Fragment key={y}>
@@ -274,16 +254,6 @@ function BirchTrunk({ progress, tP, detailP, tr, rimLightOp, duskOp, dayOp, sunA
           </React.Fragment>
         ))}
       </g>
-
-      {/* Side shadow */}
-      {dayOp > 0.2 && (
-        <path d="M300,524 C298,462 305,398 296,330 C290,269 298,214 294,152 C290,116 298,96 298,72"
-          stroke="rgba(80,60,40,0.35)" strokeWidth="6" strokeLinecap="round" fill="none"
-          opacity={dayOp * 0.5}
-          transform={`translate(${-rimLightX * 10}, 0)`}
-          style={{ transition:'opacity 4s,transform 4s' }}
-          strokeDasharray="552" strokeDashoffset={552*(1-tP)}/>
-      )}
 
       {/* Rim light */}
       {rimLightOp > 0.1 && (
@@ -300,12 +270,7 @@ function BirchTrunk({ progress, tP, detailP, tr, rimLightOp, duskOp, dayOp, sunA
 }
 
 /* ─────────────────────── MAIN SCENE COMPONENT ─────────────────────── */
-export default function TreeScene({
-  progress, theme, themeKey, isActive, nearlyDone, finalStretch,
-  treeShake, shimmer, birdFlying, doneSparkles, redoSparkles,
-  petals, floaters, activeMilestone, focusRespCountdown,
-  sessionsToday,
-}) {
+export default function TreeScene({ progress, theme, treeShake, shimmer }) {
   const safeProgress = Math.max(0, Math.min(1, progress));
 
   const tP        = c01(safeProgress, 0.00, 0.10);
@@ -342,74 +307,33 @@ export default function TreeScene({
   const shadowStretchX = 1 + Math.abs(sunAngleNorm) * 0.5;
   const shadowOp       = 0.10 + (1 - sunHeight) * 0.04;
   const shadowBlur     = 1.2 + (1 - sunHeight) * 1.8;
-  const goldenHourOp   = Math.max(dawnOp, duskOp) * 0.85 * (1 - nightOp);
-  const goldenColor    = duskOp > 0.5 ? 'rgba(255,140,72,0.55)' : 'rgba(255,200,120,0.45)';
   const nightWashOp    = nightOp * 0.7;
-  const middayOp       = dayOp * 0.25 * (1 - Math.max(dawnOp, duskOp) * 0.6);
   const rimLightOp     = sunHeight * (1 - nightOp) * 0.6;
   const rimLightX      = sunAngleNorm;
   const grassWarmth    = Math.max(dawnOp, duskOp);
   const grassDarken    = nightOp;
-  const cardsGlowIntensity = safeProgress;
-  const ink = '#2d2418';
 
   const BLOBS = buildBlobs(theme);
-  const serif = "'Fraunces', Georgia, serif";
-  const sans  = "system-ui,-apple-system,'Helvetica Neue',sans-serif";
   const isPine   = theme.shape === 'pine';
   const isBonsai = theme.shape === 'bonsai';
   const isBirch  = theme.shape === 'birch';
 
   const treeSceneProps = {
     progress: safeProgress, theme,
-    sunAngleNorm, sunHeight, duskOp, dayOp,
+    sunAngleNorm, sunHeight, duskOp,
     rimLightOp, rimLightX, nightOp,
   };
 
   return (
     <div style={{ position:'relative', flex:'1 1 50%', overflow:'hidden', zIndex:3 }}>
 
-      {/* Lighting layers */}
-      {goldenHourOp > 0.01 && (
-        <div style={{
-          position:'absolute', inset:0, pointerEvents:'none', zIndex:2,
-          background:`radial-gradient(ellipse 110% 70% at ${sunPct*2}% 100%, ${goldenColor} 0%, ${goldenColor.replace(/[\d.]+\)$/,'0.25)')} 30%, transparent 65%)`,
-          mixBlendMode:'soft-light', opacity:goldenHourOp, transition:'background 4s,opacity 4s',
-        }}/>
-      )}
-      {dayOp > 0.1 && !nightOp && (
-        <div style={{
-          position:'absolute', inset:'40% 0 0 0', pointerEvents:'none', zIndex:2,
-          background:`linear-gradient(${90+sunAngleNorm*60}deg, rgba(255,240,200,0.18) 0%, transparent 50%, rgba(45,36,60,0.12) 100%)`,
-          mixBlendMode:'soft-light', opacity:dayOp, transition:'background 4s,opacity 4s',
-        }}/>
-      )}
-      {middayOp > 0.01 && (
-        <div style={{
-          position:'absolute', inset:'45% 0 0 0', pointerEvents:'none', zIndex:2,
-          background:'radial-gradient(ellipse 100% 100% at 50% 100%, rgba(180,210,220,0.18) 0%, transparent 70%)',
-          mixBlendMode:'screen', opacity:middayOp, transition:'opacity 4s',
-        }}/>
-      )}
+      {/* Night wash — only applied to the tree scene, not blocking the video */}
       {nightWashOp > 0.01 && (
         <div style={{
           position:'absolute', inset:'30% 0 0 0', pointerEvents:'none', zIndex:2,
-          background:'linear-gradient(to bottom, transparent 0%, rgba(30,45,90,0.5) 70%, rgba(15,25,55,0.7) 100%)',
+          background:'linear-gradient(to bottom, transparent 0%, rgba(15,25,55,0.45) 70%, rgba(8,15,40,0.65) 100%)',
           mixBlendMode:'multiply', opacity:nightWashOp, transition:'opacity 4s',
         }}/>
-      )}
-      {goldenHourOp > 0.3 && isActive && (
-        <div style={{ position:'absolute', inset:0, pointerEvents:'none', zIndex:2 }}>
-          {Array.from({length:18}).map((_,i) => (
-            <div key={`dust${i}`} style={{
-              position:'absolute', left:`${10+(i*5.2)%70}%`, top:`${40+(i*7.3)%35}%`,
-              width:2+(i%2), height:2+(i%2), borderRadius:'50%',
-              background:duskOp>0.5?'rgba(255,200,150,0.7)':'rgba(255,230,180,0.7)',
-              boxShadow:`0 0 4px ${duskOp>0.5?'rgba(255,180,120,0.6)':'rgba(255,220,160,0.5)'}`,
-              opacity:goldenHourOp*0.7, animation:`dustDrift ${8+(i%4)*2}s ease-in-out ${(i*0.4)%5}s infinite`,
-            }}/>
-          ))}
-        </div>
       )}
 
       {/* Tree container */}
@@ -498,8 +422,8 @@ export default function TreeScene({
 
               {isBirch ? (
                 <BirchTrunk tP={tP} detailP={detailP} tr={tr}
-                  rimLightOp={rimLightOp} duskOp={duskOp} dayOp={dayOp}
-                  sunAngleNorm={sunAngleNorm} rimLightX={rimLightX} progress={safeProgress}/>
+                  rimLightOp={rimLightOp} duskOp={duskOp}
+                  sunAngleNorm={sunAngleNorm} rimLightX={rimLightX}/>
               ) : (
                 <>
                   {/* Standard trunk */}
@@ -621,18 +545,6 @@ export default function TreeScene({
         </svg>
       </div>
 
-      {/* Rim light overlay on canopy */}
-      {rimLightOp > 0.05 && !isPine && !isBonsai && (
-        <div style={{
-          position:'absolute', bottom:0, left:0, right:0, height:'70%',
-          pointerEvents:'none', zIndex:4,
-          background:`url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%'/>")`,
-        }}>
-          <svg viewBox="0 -180 600 740" style={{ width:'100%', height:'100%', position:'absolute', bottom:0 }}>
-            <rect x="0" y="-180" width="600" height="920" fill="url(#rimLight)"/>
-          </svg>
-        </div>
-      )}
     </div>
   );
 }

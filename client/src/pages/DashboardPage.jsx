@@ -122,7 +122,20 @@ export default function DashboardPage() {
             <StatCard label="Study time" value={timeDisplay} sub={`${stats.totalSessions} sessions`} color="#3d5a3a"/>
             <StatCard label="Trees grown" value={stats.totalSessions} sub={`${Object.keys(TREE_THEMES).filter(k => stats.treeBreakdown.find(b=>b.tree_type===k)).length} species`} color="#4a7a45"/>
             <StatCard label="Cards done" value={stats.totalCards.toLocaleString()} sub={`${stats.totalRedos} redos`} color="#7a3e1a"/>
-            <StatCard label="Day streak" value={`${stats.streak}🔥`} sub={stats.streak>0?'Keep it up':'Start today'} color={stats.streak>2?'#b86134':'#9b8a6e'}/>
+            <StatCard label="Day streak"
+              value={
+                <span style={{ display:'inline-flex', alignItems:'center', gap:6 }}>
+                  {stats.streak}
+                  {stats.streak > 0 && (
+                    <svg width="18" height="22" viewBox="0 0 18 22" style={{ verticalAlign:'middle', marginBottom:2 }}>
+                      <path d="M9,2 C7,6 4,8 4,13 C4,17.4 6.2,20 9,20 C11.8,20 14,17.4 14,13 C14,8 11,6 9,2 Z" fill={stats.streak>2?'#c45820':'#a87840'} opacity="0.9"/>
+                      <path d="M9,8 C8,10 6.5,11 6.5,13.5 C6.5,15.8 7.6,17 9,17 C10.4,17 11.5,15.8 11.5,13.5 C11.5,11 10,10 9,8 Z" fill={stats.streak>4?'#f8e020':'#f8c040'} opacity="0.85"/>
+                    </svg>
+                  )}
+                </span>
+              }
+              sub={stats.streak>0?`${stats.streak === 1 ? 'day' : 'days'} in a row`:'Start today'}
+              color={stats.streak>2?'#b86134':'#9b8a6e'}/>
           </div>
 
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20, marginBottom:28 }}>

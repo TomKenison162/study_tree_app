@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { api } from '../api.js';
 import TreeScene from '../components/TreeScene.jsx';
+import RareGuest from '../components/RareGuest.jsx';
 import { TREE_THEMES, TinyTreeIcon } from '../components/treeTypes.jsx';
 
 /* ── AUDIO ── */
@@ -74,17 +75,62 @@ export default function TimerPage() {
   const [draftCards, setDraftCards] = useState(30);
   const [draftTheme, setDraftTheme] = useState('orchard');
   const [savingSession, setSavingSession] = useState(false);
+  const [guest, setGuest] = useState(null); // { type, state, id }
 
-  const audioCtxRef   = useRef(null);
-  const completedRef  = useRef(false);
-  const fxIdRef       = useRef(0);
-  const videoRef      = useRef(null);
+  const audioCtxRef    = useRef(null);
+  const completedRef   = useRef(false);
+  const fxIdRef        = useRef(0);
+  const videoRef       = useRef(null);
   const [videoDuration, setVideoDuration] = useState(0);
-  const focusCheckRef = useRef(FOCUS_CHECK_INTERVAL);
+  const focusCheckRef  = useRef(FOCUS_CHECK_INTERVAL);
   const lastInteractionRef = useRef(Date.now());
-  const birdTimerRef  = useRef(null);
+  const birdTimerRef   = useRef(null);
+  const guestLeaveRef  = useRef(null);  // natural departure timer
+  const guestSpawnRef  = useRef(null);  // next idle spawn
 
   const markInteraction = useCallback(() => { lastInteractionRef.current = Date.now(); }, []);
+
+  function rollGuestType() {
+    const r = Math.random();
+    return r < 0.10 ? 'cat' : r < 0.30 ? 'bear' : r < 0.60 ? 'owl' : 'fox';
+  }
+
+  const departGuest = useCallback((scared = false) => {
+    clearTimeout(guestLeaveRef.current);
+    setGuest(g => g ? { ...g, state: scared ? 'leaving' : 'leaving' } : null);
+    guestLeaveRef.current = setTimeout(() => setGuest(null), scared ? 700 : 1300);
+  }, []);
+
+  const spawnGuest = useCallback((forceAlert = false) => {
+    clearTimeout(guestLeaveRef.current);
+    const type = rollGuestType();
+    const id   = Date.now();
+    setGuest({ type, state: forceAlert ? 'alert' : 'entering', id });
+    if (!forceAlert) {
+      const stayMs = 32000 + Math.random() * 18000;
+      guestLeaveRef.current = setTimeout(() => departGuest(false), stayMs);
+    }
+  }, [departGuest]);
+
+  /* Periodic idle-session guest appearances */
+  useEffect(() => {
+    if (!isActive) {
+      clearTimeout(guestSpawnRef.current);
+      return;
+    }
+    const schedule = () => {
+      const delay = 110000 + Math.random() * 90000;
+      guestSpawnRef.current = setTimeout(() => {
+        setGuest(g => {
+          if (!g) { spawnGuest(false); }
+          return g;
+        });
+        schedule();
+      }, delay);
+    };
+    schedule();
+    return () => clearTimeout(guestSpawnRef.current);
+  }, [isActive, spawnGuest]);
 
   const playSound = useCallback((kind) => {
     if (!soundOn) return;
@@ -109,6 +155,15 @@ export default function TimerPage() {
       const perCard = totalSeconds/Math.max(1,totalCards);
       const threshold = Math.max(45,Math.min(IDLE_BASE_SECONDS,perCard*1.6));
       if (idle > threshold && focusRespCountdown===null) {
+        // Animal-based focus check: alert existing guest or spawn one
+        setGuest(g => {
+          if (g && (g.state==='entering'||g.state==='idle')) {
+            clearTimeout(guestLeaveRef.current);
+            return { ...g, state:'alert' };
+          }
+          if (!g) return { type:rollGuestType(), state:'alert', id:Date.now() };
+          return g;
+        });
         setFocusRespCountdown(FOCUS_RESPONSE_WINDOW);
         lastInteractionRef.current = Date.now();
       }
@@ -141,13 +196,35 @@ export default function TimerPage() {
     }
   }, [timeLeft, isActive, themeKey, totalMins, totalCards, cardsDone, freshDone, reviewDone, redos, intention, playSound, saveSession]);
 
-  /* Focus check */
+  /* Focus check countdown + guest fleeing on timeout */
   useEffect(() => {
     if (focusRespCountdown===null) return;
-    if (focusRespCountdown<=0) { setIsActive(false); setFocusRespCountdown(null); return; }
+    if (focusRespCountdown<=0) {
+      setIsActive(false);
+      setFocusRespCountdown(null);
+      // Scare the guest away
+      clearTimeout(guestLeaveRef.current);
+      setGuest(g => g ? { ...g, state:'leaving' } : null);
+      guestLeaveRef.current = setTimeout(() => setGuest(null), 700);
+      return;
+    }
     const id = setTimeout(() => setFocusRespCountdown(n=>n-1), 1000);
     return () => clearTimeout(id);
   }, [focusRespCountdown]);
+
+  /* Click the animal = pass the focus check */
+  const handleGuestClick = useCallback(() => {
+    if (!guest || guest.state !== 'alert') return;
+    setFocusRespCountdown(null);
+    focusCheckRef.current = FOCUS_CHECK_INTERVAL;
+    markInteraction();
+    setGuest(g => g ? { ...g, state:'clicked' } : null);
+    clearTimeout(guestLeaveRef.current);
+    guestLeaveRef.current = setTimeout(() => {
+      setGuest(g => g ? { ...g, state:'leaving' } : null);
+      setTimeout(() => setGuest(null), 1300);
+    }, 1100);
+  }, [guest, markInteraction]);
 
   const dismissFocusCheck = () => {
     setFocusRespCountdown(null); focusCheckRef.current=FOCUS_CHECK_INTERVAL; markInteraction();
@@ -234,6 +311,8 @@ export default function TimerPage() {
     setMilestonesHit({q1:false,q2:false,q3:false}); setActiveMilestone(null);
     setShowCelebration(false); setBirdFlying(false);
     setDoneSparkles([]); setRedoSparkles([]); setFloaters([]); setPetals([]);
+    clearTimeout(guestLeaveRef.current); clearTimeout(guestSpawnRef.current);
+    setGuest(null);
   }, [totalSeconds]);
 
   const fireFloater = (kind) => {
@@ -341,13 +420,6 @@ export default function TimerPage() {
   const DRIFT_LEAVES = Array.from({length:8},(_,i)=>({ id:i, delay:i*4+(i%3), dur:14+(i%5), startY:5+(i*9)%25, size:6+(i%3)*2, col:['#7a9d6a','#c4965a','#e89548','#9bb38a'][i%4] }));
   const FIREFLIES   = Array.from({length:14},(_,i)=>({ id:i, x:8+(i*13.7)%84, y:35+(i*7.3)%35, delay:(i*0.5)%6, dur:5+(i%4) }));
 
-  /* Sky gradient based on time-of-day */
-  const skyGrad = (() => {
-    if (nightOp > 0.7) return 'linear-gradient(to bottom, #0a0e1a 0%, #1a1e2a 60%, #2a1e1a 100%)';
-    if (duskOp > 0.5)  return 'linear-gradient(to bottom, #2a1840 0%, #8a3a28 40%, #e87040 70%, #f0a060 100%)';
-    if (dawnOp > 0.5)  return 'linear-gradient(to bottom, #8a5a80 0%, #c08888 40%, #e8b070 70%, #f0d090 100%)';
-    return 'linear-gradient(to bottom, #8ec5e8 0%, #b8d8f0 50%, #ddeeff 100%)';
-  })();
 
   return (
     <div style={{
@@ -362,12 +434,6 @@ export default function TimerPage() {
         style={{ position:'absolute', left:0, top:0, width:'61%', height:'100%',
           objectFit:'cover', zIndex:0, pointerEvents:'none' }}/>
 
-      {/* Sky overlay */}
-      <div style={{
-        position:'absolute', left:0, top:0, width:'61%', height:'100%',
-        background:skyGrad, opacity:0.55, zIndex:1, pointerEvents:'none',
-        transition:'background 4s ease-out',
-      }}/>
 
       {/* Stars */}
       {duskOp>0.3 && (
@@ -516,14 +582,8 @@ export default function TimerPage() {
 
       {/* ══ TREE SCENE ══ */}
       <TreeScene
-        progress={progress} theme={theme} themeKey={themeKey}
-        isActive={isActive} nearlyDone={nearlyDone} finalStretch={finalStretch}
-        treeShake={treeShake} shimmer={shimmer} birdFlying={birdFlying}
-        doneSparkles={doneSparkles} redoSparkles={redoSparkles}
-        petals={petals} floaters={floaters}
-        activeMilestone={activeMilestone}
-        focusRespCountdown={focusRespCountdown}
-        sessionsToday={sessionsToday}
+        progress={progress} theme={theme}
+        treeShake={treeShake} shimmer={shimmer}
       />
 
       {/* Intention banner */}
@@ -743,46 +803,14 @@ export default function TimerPage() {
         </div>
       </div>
 
-      {/* Focus check — fox */}
-      {focusRespCountdown!==null && (
-        <div style={{ position:'fixed', inset:0, zIndex:100, pointerEvents:'auto' }}>
-          <div style={{ position:'absolute', inset:0, background:'radial-gradient(circle at 25% 65%, transparent 0%, rgba(45,36,24,0.25) 70%)', pointerEvents:'none' }}/>
-          <div style={{ position:'absolute', bottom:'8%', left:'4%', display:'flex', alignItems:'flex-end', gap:14, animation:'foxPeek 0.5s cubic-bezier(0.34,1.56,0.64,1)' }}>
-            <svg width="92" height="100" viewBox="0 0 92 100" style={{ flexShrink:0 }}>
-              <path d="M14,72 Q4,60 6,46 Q10,38 18,42 Q24,52 22,66 Z" fill="#c4521e"/>
-              <ellipse cx="46" cy="68" rx="28" ry="22" fill="#d4621e"/>
-              <ellipse cx="46" cy="78" rx="20" ry="10" fill="#fef0d8" opacity="0.9"/>
-              <rect x="32" y="80" width="6" height="14" rx="2" fill="#a04210"/>
-              <rect x="56" y="80" width="6" height="14" rx="2" fill="#a04210"/>
-              <ellipse cx="62" cy="44" rx="22" ry="20" fill="#d4621e"/>
-              <path d="M48,30 L42,12 L56,24 Z" fill="#d4621e"/><path d="M48,28 L46,18 L52,24 Z" fill="#1a0e02"/>
-              <path d="M76,30 L82,12 L68,24 Z" fill="#d4621e"/><path d="M76,28 L78,18 L72,24 Z" fill="#1a0e02"/>
-              <path d="M48,48 Q56,58 62,52 Q68,58 76,48 Q72,40 62,42 Q52,40 48,48 Z" fill="#fef0d8"/>
-              <ellipse cx="54" cy="42" rx="2.2" ry={focusRespCountdown<=5?0.4:2.5} fill="#1a0e02">
-                <animate attributeName="ry" values="2.5;0.4;2.5" dur="2s" repeatCount="indefinite"/>
-              </ellipse>
-              <ellipse cx="70" cy="42" rx="2.2" ry={focusRespCountdown<=5?0.4:2.5} fill="#1a0e02">
-                <animate attributeName="ry" values="2.5;0.4;2.5" dur="2s" repeatCount="indefinite" begin="0.1s"/>
-              </ellipse>
-              <ellipse cx="62" cy="51" rx="2" ry="1.5" fill="#1a0e02"/>
-            </svg>
-            <div style={{ position:'relative', background:cream, border:`0.5px solid ${line}`, borderRadius:16, padding:'14px 18px', maxWidth:280, boxShadow:'0 8px 28px rgba(45,36,24,0.18)', marginBottom:24 }}>
-              <div style={{ position:'absolute', bottom:8, left:-9, width:0, height:0, borderTop:'6px solid transparent', borderBottom:'6px solid transparent', borderRight:`10px solid ${cream}` }}/>
-              <div style={{ fontSize:15, fontWeight:400, color:ink, fontFamily:serif, lineHeight:1.35 }}>Still focused?</div>
-              <p style={{ fontSize:11, color:ink2, margin:'4px 0 10px 0', lineHeight:1.5, fontStyle:'italic', fontFamily:serif }}>I'll wait {focusRespCountdown}s, then tuck in for a nap.</p>
-              <div style={{ display:'flex', gap:8, alignItems:'center' }}>
-                <button onClick={dismissFocusCheck} style={{ background:theme.accentDeep, color:cream, border:'none', borderRadius:8, padding:'7px 14px', fontSize:10, fontWeight:500, cursor:'pointer', letterSpacing:'0.16em', textTransform:'uppercase', fontFamily:sans }}>Yes, I'm here</button>
-                <button onClick={()=>{setFocusRespCountdown(null);setIsActive(false);}} style={{ background:'transparent', border:'none', color:ink3, fontSize:11, cursor:'pointer', padding:'4px 6px', fontStyle:'italic', fontFamily:serif }}>break</button>
-                <div style={{ marginLeft:'auto', position:'relative', width:24, height:24 }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" style={{ transform:'rotate(-90deg)' }}>
-                    <circle cx="12" cy="12" r="10" fill="none" stroke={line} strokeWidth="1.5"/>
-                    <circle cx="12" cy="12" r="10" fill="none" stroke={focusRespCountdown<=8?'#b03020':'#c4965a'} strokeWidth="1.5" strokeLinecap="round" strokeDasharray={`${2*Math.PI*10}`} strokeDashoffset={2*Math.PI*10*(1-focusRespCountdown/FOCUS_RESPONSE_WINDOW)} style={{ transition:'stroke-dashoffset 1s linear,stroke 0.5s' }}/>
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* Rare Guest — clickable during focus check */}
+      {guest && (
+        <RareGuest
+          type={guest.type}
+          state={guest.state}
+          countdown={focusRespCountdown ?? 20}
+          onClick={handleGuestClick}
+        />
       )}
 
       {/* Completion modal */}
