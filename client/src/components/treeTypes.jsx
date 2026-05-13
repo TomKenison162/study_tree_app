@@ -66,6 +66,21 @@ export const TREE_THEMES = {
     glow: 'rgba(140,180,100,', petal: '#b8c8a0',
     canopyScale: 1.0, canopyDropY: 0,
   },
+  magnolia: {
+    name: 'Magnolia', shape: 'deciduous',
+    leafDark: '#2a4030', leafMid: '#4a7050', leafLight: '#7aaa78',
+    accent: '#e0b8c8', accentDeep: '#8a4060',
+    glow: 'rgba(240,200,220,', petal: '#f0c8d8',
+    canopyScale: 0.96, canopyDropY: 4,
+    flowerColor: '#f0d0e0', flowerAccent: '#e8a0b8',
+  },
+  redwood: {
+    name: 'Redwood', shape: 'redwood',
+    leafDark: '#1a3818', leafMid: '#2a5820', leafLight: '#3a7a30',
+    accent: '#5a3a20', accentDeep: '#3a2010',
+    glow: 'rgba(100,70,40,', petal: '#8a6040',
+    canopyScale: 1.0, canopyDropY: 0,
+  },
 };
 
 /* ════════════════════════════════════════════════════════════
@@ -265,6 +280,18 @@ export function TinyTreeIcon({ themeKey, size = 32, opacity = 1 }) {
         <circle cx="6" cy="7" r="6" fill={theme.leafMid}/>
         <circle cx="16" cy="7.5" r="5.5" fill={theme.leafMid}/>
         <circle cx="11" cy="5" r="5" fill={theme.leafLight}/>
+      </svg>
+    );
+  }
+  if (theme.shape === 'redwood') {
+    return (
+      <svg width={size} height={h} viewBox="0 0 22 30" style={{ opacity }}>
+        <rect x="9" y="8" width="4" height="20" fill="#6a3a1a" rx="0.5"/>
+        <rect x="9.5" y="8" width="1" height="20" fill="#8a5a30" rx="0.5" opacity="0.4"/>
+        <polygon points="11,0 5,8 17,8" fill={theme.leafDark}/>
+        <polygon points="11,3 6,10 16,10" fill={theme.leafMid}/>
+        <polygon points="11,6 5,14 17,14" fill={theme.leafDark} opacity="0.9"/>
+        <polygon points="11,9 6,16 16,16" fill={theme.leafLight} opacity="0.8"/>
       </svg>
     );
   }
