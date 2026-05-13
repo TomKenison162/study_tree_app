@@ -29,6 +29,53 @@ const FOCUS_RESPONSE_WINDOW = 20;
 const IDLE_BASE_SECONDS     = 90;
 const c01 = (v,a,b) => Math.max(0,Math.min(1,(v-a)/(b-a)));
 
+/* ── RAIN AUDIO ── */
+function startRainAudio(ctx) {
+  const sr  = ctx.sampleRate;
+  const len = sr * 4;
+  const buf = ctx.createBuffer(2, len, sr);
+  for (let ch = 0; ch < 2; ch++) {
+    const d = buf.getChannelData(ch);
+    let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+    for (let i = 0; i < len; i++) {
+      const w = Math.random()*2-1;
+      b0=0.99886*b0+w*0.0555179; b1=0.99332*b1+w*0.0750759;
+      b2=0.96900*b2+w*0.1538520; b3=0.86650*b3+w*0.3104856;
+      b4=0.55000*b4+w*0.5329522; b5=-0.7616*b5-w*0.0168980;
+      d[i]=(b0+b1+b2+b3+b4+b5+b6+w*0.5362)*0.10;
+      b6=w*0.115926;
+    }
+  }
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  src.loop   = true;
+  const lp = ctx.createBiquadFilter(); lp.type='lowpass';  lp.frequency.value=950; lp.Q.value=0.3;
+  const hp = ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=130;
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0, ctx.currentTime);
+  gain.gain.linearRampToValueAtTime(0.30, ctx.currentTime+1.4);
+  src.connect(lp); lp.connect(hp); hp.connect(gain); gain.connect(ctx.destination);
+  src.start();
+  return { src, gain };
+}
+function stopRainAudio(ctx, rain) {
+  if (!rain) return;
+  try {
+    rain.gain.gain.setValueAtTime(rain.gain.gain.value, ctx.currentTime);
+    rain.gain.gain.linearRampToValueAtTime(0, ctx.currentTime+0.9);
+    setTimeout(() => { try { rain.src.stop(); } catch(e){} }, 1100);
+  } catch(e) {}
+}
+
+/* ── RAIN DROP + RIPPLE CONSTANTS ── */
+const RAIN_DROPS = Array.from({length:30}, (_,i) => ({
+  id:i, x:2+(i*3.47)%96, delay:(i*0.097)%0.85,
+  dur:0.38+(i%4)*0.07, op:0.38+(i%3)*0.12, len:11+(i%4)*3,
+}));
+const RIPPLES = Array.from({length:8}, (_,i) => ({
+  id:i, x:4+i*5.5, delay:i*0.19, dur:0.9+(i%3)*0.28, rx:13+(i%3)*5, ry:3+(i%2)*2,
+}));
+
 const serif = "'Fraunces', Georgia, serif";
 const sans  = "system-ui,-apple-system,'Helvetica Neue',sans-serif";
 const ink   = '#2d2418';
@@ -85,8 +132,10 @@ export default function TimerPage() {
   const focusCheckRef  = useRef(FOCUS_CHECK_INTERVAL);
   const lastInteractionRef = useRef(Date.now());
   const birdTimerRef   = useRef(null);
-  const guestLeaveRef  = useRef(null);  // natural departure timer
-  const guestSpawnRef  = useRef(null);  // next idle spawn
+  const guestLeaveRef  = useRef(null);
+  const guestSpawnRef  = useRef(null);
+  const rainRef        = useRef(null);
+  const [rainOn, setRainOn] = useState(false);
 
   const markInteraction = useCallback(() => { lastInteractionRef.current = Date.now(); }, []);
 
@@ -144,6 +193,43 @@ export default function TimerPage() {
       sounds[kind]?.(audioCtxRef.current);
     } catch(e) {}
   }, [soundOn]);
+
+  const ensureAudioCtx = useCallback(() => {
+    if (!audioCtxRef.current) {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (Ctx) audioCtxRef.current = new Ctx();
+    }
+    if (audioCtxRef.current?.state === 'suspended') audioCtxRef.current.resume();
+    return audioCtxRef.current;
+  }, []);
+
+  const toggleRain = useCallback(() => {
+    setRainOn(on => {
+      const next = !on;
+      if (next) {
+        const ctx = ensureAudioCtx();
+        if (ctx && soundOn) rainRef.current = startRainAudio(ctx);
+      } else {
+        if (rainRef.current && audioCtxRef.current) {
+          stopRainAudio(audioCtxRef.current, rainRef.current);
+          rainRef.current = null;
+        }
+      }
+      return next;
+    });
+  }, [soundOn, ensureAudioCtx]);
+
+  /* Sync rain audio when soundOn changes */
+  useEffect(() => {
+    if (!rainOn) return;
+    if (soundOn && !rainRef.current) {
+      const ctx = ensureAudioCtx();
+      if (ctx) rainRef.current = startRainAudio(ctx);
+    } else if (!soundOn && rainRef.current && audioCtxRef.current) {
+      stopRainAudio(audioCtxRef.current, rainRef.current);
+      rainRef.current = null;
+    }
+  }, [soundOn, rainOn, ensureAudioCtx]);
 
   /* Timer tick */
   useEffect(() => {
@@ -580,6 +666,41 @@ export default function TimerPage() {
         </div>
       )}
 
+      {/* ══ RAIN DROPS ══ */}
+      {rainOn && RAIN_DROPS.map(d => (
+        <div key={d.id} style={{
+          position:'absolute', zIndex:4, pointerEvents:'none',
+          left:`${d.x}%`, top:'-20px',
+          width:'1.5px', height:`${d.len}px`,
+          background:`rgba(168,210,255,${d.op})`,
+          borderRadius:'1px',
+          animation:`rainFall ${d.dur}s linear ${d.delay}s infinite`,
+          boxShadow:`0 0 2px rgba(168,210,255,${d.op*0.6})`,
+        }}/>
+      ))}
+
+      {/* ══ POND RIPPLES (ground left panel) ══ */}
+      {rainOn && RIPPLES.map(r => (
+        <div key={r.id} style={{
+          position:'absolute', zIndex:5, pointerEvents:'none',
+          left:`${r.x}%`, bottom:`${18 + (r.id%3)*1.2}%`,
+          width:`${r.rx*2}px`, height:`${r.ry*2}px`,
+          borderRadius:'50%',
+          border:'1px solid rgba(168,210,255,0.65)',
+          animation:`rainRipple ${r.dur}s ease-out ${r.delay}s infinite`,
+        }}/>
+      ))}
+
+      {/* Wet-ground sheen */}
+      {rainOn && (
+        <div style={{
+          position:'absolute', zIndex:4, pointerEvents:'none',
+          left:0, bottom:'14%', width:'50%', height:'10%',
+          background:'linear-gradient(to bottom, transparent, rgba(100,170,230,0.10))',
+          animation:'wetSheen 4s ease-in-out infinite',
+        }}/>
+      )}
+
       {/* ══ TREE SCENE ══ */}
       <TreeScene
         progress={progress} theme={theme}
@@ -634,6 +755,26 @@ export default function TimerPage() {
           ) : (
             <a href="/login" style={{ display:'flex', alignItems:'center', height:34, padding:'0 12px', borderRadius:17, border:`0.5px solid ${line}`, background:cream, fontSize:10, fontWeight:500, letterSpacing:'0.16em', textTransform:'uppercase', fontFamily:sans, color:ink2, textDecoration:'none', boxShadow:'0 1px 0 rgba(255,255,255,0.6) inset' }}>Sign in</a>
           )}
+          {/* Rain toggle */}
+          <button onClick={toggleRain} title={rainOn?'Rain on — click to stop':'Gentle rain'} style={{
+            width:34, height:34, borderRadius:'50%',
+            border: rainOn ? '1.5px solid rgba(100,168,230,0.75)' : `0.5px solid ${line}`,
+            background: rainOn ? 'rgba(100,168,230,0.14)' : cream,
+            cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center',
+            color: rainOn ? '#3a78b8' : ink2,
+            boxShadow: rainOn
+              ? '0 0 14px rgba(100,168,230,0.35), 0 1px 0 rgba(255,255,255,0.4) inset'
+              : '0 1px 0 rgba(255,255,255,0.6) inset',
+            transition:'all 0.3s',
+          }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25"/>
+              <line x1="8" y1="19" x2="8" y2="21"/>
+              <line x1="12" y1="17" x2="12" y2="23"/>
+              <line x1="16" y1="19" x2="16" y2="21"/>
+            </svg>
+          </button>
+
           <button onClick={()=>setSoundOn(s=>!s)} title={soundOn?'Sound on':'Sound off'} style={{ width:34, height:34, borderRadius:'50%', border:`0.5px solid ${line}`, background:cream, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 1px 0 rgba(255,255,255,0.6) inset', color:ink2 }}>
             {soundOn?(
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
@@ -932,6 +1073,20 @@ export default function TimerPage() {
         @keyframes dustDrift{0%,100%{transform:translate(0,0);opacity:0.4}25%{transform:translate(8px,-12px);opacity:0.85}50%{transform:translate(-6px,-22px);opacity:0.6}75%{transform:translate(10px,-14px);opacity:0.8}}
         input[type=range]{height:4px;border-radius:2px;}
         *{-webkit-font-smoothing:antialiased;}
+        @keyframes rainFall{
+          0%  {transform:translateY(-22px) rotate(10deg);opacity:0}
+          6%  {opacity:var(--ro,0.5)}
+          94% {opacity:var(--ro,0.5)}
+          100%{transform:translateY(102vh) rotate(10deg);opacity:0}
+        }
+        @keyframes rainRipple{
+          0%  {transform:scale(0);opacity:0.75;border-width:1.5px}
+          55% {opacity:0.25;border-width:0.8px}
+          100%{transform:scale(1);opacity:0;border-width:0.3px}
+        }
+        @keyframes wetSheen{
+          0%,100%{opacity:0.6} 50%{opacity:1}
+        }
       `}</style>
     </div>
   );
