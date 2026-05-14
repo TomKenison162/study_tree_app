@@ -77,11 +77,6 @@ const RIPPLES = Array.from({length:8}, (_,i) => ({
 }));
 
 /* ── DYNAMIC WEATHER PARTICLES ── */
-const SNOW_FLAKES = Array.from({length:45}, (_,i) => ({
-  id:i, x:(i*2.27)%50, delay:(i*0.14)%3,
-  dur:4+(i%5)*0.8, size:1.5+(i%4), drift:((i%9)-4)*6,
-  op:0.5+(i%3)*0.15,
-}));
 const MIST_LAYERS = [
   { top:'25%', h:'22%', blur:28, dur:22, delay:0, op:0.25 },
   { top:'42%', h:'18%', blur:32, dur:28, delay:6, op:0.2 },
@@ -91,7 +86,7 @@ const WIND_STREAKS = Array.from({length:14}, (_,i) => ({
   id:i, y:15+(i*4.7)%55, dur:1.2+(i%4)*0.3,
   delay:i*0.25, w:15+(i%3)*12, op:0.12+(i%3)*0.06,
 }));
-const WEATHER_TYPES = ['clear','snow','mist','windy'];
+const WEATHER_TYPES = ['clear','mist','windy'];
 
 const serif = "'Fraunces', Georgia, serif";
 const sans  = "system-ui,-apple-system,'Helvetica Neue',sans-serif";
@@ -157,6 +152,8 @@ export default function TimerPage() {
   const weatherTimerRef = useRef(null);
   const [shootingStars, setShootingStars] = useState([]);
   const shootingStarRef = useRef(null);
+  const [comets, setComets] = useState([]);
+  const cometRef = useRef(null);
 
   const markInteraction = useCallback(() => { lastInteractionRef.current = Date.now(); }, []);
 
@@ -285,6 +282,23 @@ export default function TimerPage() {
     };
     spawn();
     return () => clearTimeout(shootingStarRef.current);
+  }, [isActive]);
+
+  /* Rare comet — much rarer than shooting stars, bigger and more colorful */
+  useEffect(() => {
+    if (!isActive) { clearTimeout(cometRef.current); return; }
+    const spawn = () => {
+      const delay = 60000 + Math.random() * 90000;
+      cometRef.current = setTimeout(() => {
+        const id = Date.now();
+        const startY = 2 + Math.random() * 10;
+        setComets(c => [...c, { id, startY }]);
+        setTimeout(() => setComets(c => c.filter(x => x.id !== id)), 4000);
+        spawn();
+      }, delay);
+    };
+    spawn();
+    return () => clearTimeout(cometRef.current);
   }, [isActive]);
 
   /* Timer tick */
@@ -455,7 +469,8 @@ export default function TimerPage() {
     setDoneSparkles([]); setRedoSparkles([]); setFloaters([]); setPetals([]);
     clearTimeout(guestLeaveRef.current); clearTimeout(guestSpawnRef.current);
     clearTimeout(weatherTimerRef.current); clearTimeout(shootingStarRef.current);
-    setGuest(null); setWeather('clear'); setShootingStars([]);
+    clearTimeout(cometRef.current);
+    setGuest(null); setWeather('clear'); setShootingStars([]); setComets([]);
   }, [totalSeconds]);
 
   const fireFloater = (kind) => {
@@ -764,20 +779,6 @@ export default function TimerPage() {
         }}/>
       )}
 
-      {/* ══ DYNAMIC WEATHER: SNOW ══ */}
-      {weather === 'snow' && isActive && SNOW_FLAKES.map(s => (
-        <div key={`snow${s.id}`} style={{
-          position:'absolute', zIndex:4, pointerEvents:'none',
-          left:`${s.x}%`, top:'-10px',
-          width:s.size, height:s.size,
-          borderRadius:'50%', background:'white',
-          opacity:s.op,
-          boxShadow:'0 0 3px rgba(255,255,255,0.8)',
-          animation:`snowFall ${s.dur}s linear ${s.delay}s infinite`,
-          '--drift':`${s.drift}px`,
-        }}/>
-      ))}
-
       {/* ══ DYNAMIC WEATHER: MIST ══ */}
       {weather === 'mist' && isActive && MIST_LAYERS.map((m, i) => (
         <div key={`mist${i}`} style={{
@@ -829,6 +830,20 @@ export default function TimerPage() {
           }}/>
         </>
       )}
+
+      {/* ══ RARE COMET ══ */}
+      {nightOp > 0.2 && comets.map(c => (
+        <div key={c.id} style={{
+          position:'absolute', zIndex:3, pointerEvents:'none',
+          left:'2%', top:`${c.startY}%`,
+          width:250, height:6,
+          background:'linear-gradient(90deg, transparent 0%, rgba(120,200,255,0.06) 8%, rgba(140,220,255,0.2) 20%, rgba(180,240,255,0.5) 40%, #b0f0ff 55%, #e0ffff 70%, rgba(255,200,100,0.8) 85%, #fff8e0 92%, transparent 100%)',
+          borderRadius:3, transform:'rotate(18deg)',
+          boxShadow:'0 0 20px 6px rgba(140,220,255,0.4), 0 0 50px 12px rgba(140,220,255,0.15)',
+          animation:'cometStreak 3.5s ease-in-out forwards',
+          opacity: nightOp,
+        }}/>
+      ))}
 
       {/* ══ SHOOTING STARS (night sky) ══ */}
       {nightOp > 0.15 && shootingStars.map(s => (
@@ -893,75 +908,41 @@ export default function TimerPage() {
         </div>
       )}
 
-      {/* ══ SNAIL (crawls up trunk with progress) ══ */}
-      {isActive && progress > 0.05 && (
-        <div style={{
-          position:'absolute', zIndex:10, pointerEvents:'none',
-          left:'24%',
-          bottom:`${8 + progress * 35}%`,
-          transition:'bottom 3s ease-out',
-          animation:'snailBob 3.5s ease-in-out infinite',
-        }}>
-          <svg width="32" height="26" viewBox="0 0 32 26" style={{ display:'block', transform:'scaleX(-1)' }}>
-            <ellipse cx="20" cy="9.5" rx="9.5" ry="8.5" fill="#c49060"/>
-            <ellipse cx="20" cy="9.5" rx="7.5" ry="6.5" fill="#d4a878"/>
-            <path d="M20,9.5 Q24,6 22.5,3.5 Q20,1 17,3.5 Q14.5,6 17.5,9.5 Q20.5,12.5 22,9" stroke="#a07040" strokeWidth="0.8" fill="none"/>
-            <ellipse cx="11" cy="20" rx="12" ry="4.8" fill="#8a9a6a"/>
-            <ellipse cx="11" cy="19" rx="9" ry="3.2" fill="#9aaa7a" opacity="0.5"/>
-            <ellipse cx="3" cy="16.5" rx="4" ry="3.2" fill="#8a9a6a"/>
-            <line x1="2" y1="15.5" x2="-1" y2="9" stroke="#7a8a5a" strokeWidth="1" strokeLinecap="round"/>
-            <circle cx="-1" cy="9" r="1.6" fill="#2a2a2a"/>
-            <circle cx="-0.5" cy="8.5" r="0.6" fill="white" opacity="0.8"/>
-            <line x1="4.5" y1="14.5" x2="2.5" y2="10" stroke="#7a8a5a" strokeWidth="1" strokeLinecap="round"/>
-            <circle cx="2.5" cy="10" r="1.6" fill="#2a2a2a"/>
-            <circle cx="3" cy="9.5" r="0.6" fill="white" opacity="0.8"/>
-            <circle cx="1.5" cy="18" r="2.2" fill="#ffb0b0" opacity="0.4"/>
-            <path d="M1,18 Q3,20 5,18" stroke="#6a7a5a" strokeWidth="0.5" fill="none" strokeLinecap="round"/>
-          </svg>
-          <div style={{
-            position:'absolute', top:20, left:16, width:35, height:1.5,
-            background:'linear-gradient(90deg, rgba(180,200,160,0.4), transparent)',
-            borderRadius:1, filter:'blur(0.5px)',
-          }}/>
-        </div>
-      )}
-
-      {/* ══ PAPER LANTERNS (sunset/night, near tree branches) ══ */}
+      {/* ══ SKY LANTERNS (sunset/night — floating, drifting, glowing) ══ */}
       {duskOp > 0.15 && isActive && [
-        { left:'13%', bottom:'42%', delay:0, scale:0.85, swayDur:4.5 },
-        { left:'33%', bottom:'48%', delay:0.8, scale:0.8, swayDur:5 },
-        { left:'22%', bottom:'38%', delay:1.6, scale:0.7, swayDur:4 },
-        { left:'40%', bottom:'44%', delay:2.2, scale:0.75, swayDur:5.5 },
+        { startLeft:5,  top:'12%', delay:0,   scale:0.9,  driftDur:28, swayDur:5   },
+        { startLeft:18, top:'8%',  delay:3,   scale:0.75, driftDur:34, swayDur:6   },
+        { startLeft:32, top:'15%', delay:7,   scale:0.85, driftDur:30, swayDur:4.5 },
+        { startLeft:10, top:'20%', delay:12,  scale:0.65, driftDur:36, swayDur:5.5 },
+        { startLeft:38, top:'10%', delay:16,  scale:0.7,  driftDur:32, swayDur:4.8 },
       ].map((ln, idx) => (
         <div key={`lantern${idx}`} style={{
-          position:'absolute', zIndex:8, pointerEvents:'none',
-          left:ln.left, bottom:ln.bottom,
-          animation:`lanternSway ${ln.swayDur}s ease-in-out ${ln.delay}s infinite`,
-          transformOrigin:'center top',
-          opacity: Math.min(1, duskOp * 1.4) * (0.55 + warmth * 0.45),
+          position:'absolute', zIndex:5, pointerEvents:'none',
+          left:`${ln.startLeft}%`, top:ln.top,
+          animation:`lanternDrift ${ln.driftDur}s ease-in-out ${ln.delay}s infinite`,
+          opacity: Math.min(1, duskOp * 1.3) * (0.5 + warmth * 0.5),
           transform:`scale(${ln.scale})`,
         }}>
           <div style={{
-            position:'absolute', top:'28%', left:'50%', transform:'translate(-50%,-50%)',
-            width:50, height:50, borderRadius:'50%',
-            background:`radial-gradient(circle, rgba(255,180,60,${0.25+warmth*0.12}), rgba(255,140,30,0.05), transparent)`,
-            filter:'blur(10px)',
-            animation:`lanternFlicker 2.2s ease-in-out ${ln.delay+0.3}s infinite`,
-          }}/>
-          <svg width="18" height="30" viewBox="0 0 18 30" style={{ display:'block' }}>
-            <line x1="9" y1="0" x2="9" y2="5" stroke="#5a4030" strokeWidth="0.8"/>
-            <rect x="6" y="5" width="6" height="2" rx="0.5" fill="#7a6050"/>
-            <rect x="4" y="7" width="10" height="14" rx="3" fill="rgba(255,200,100,0.8)" stroke="#9a8070" strokeWidth="0.5"/>
-            <rect x="5.5" y="9" width="7" height="10" rx="2" fill="#ffd060" opacity="0.5"/>
-            <circle cx="9" cy="14" r="2.2" fill="#fff0a0" opacity="0.8"
-              style={{animation:`lanternFlicker 1.8s ease-in-out ${ln.delay+0.5}s infinite`}}/>
-            <rect x="6" y="21" width="6" height="1.5" rx="0.5" fill="#7a6050"/>
-            <path d="M7,22.5 Q9,25 11,22.5" stroke="#9a7050" strokeWidth="0.5" fill="none"/>
-            <line x1="8" y1="25" x2="8" y2="27.5" stroke="#c8585a" strokeWidth="0.5"/>
-            <circle cx="8" cy="28" r="0.7" fill="#c8585a" opacity="0.7"/>
-            <line x1="10" y1="25" x2="10" y2="27" stroke="#c8585a" strokeWidth="0.5"/>
-            <circle cx="10" cy="27.5" r="0.6" fill="#c8585a" opacity="0.6"/>
-          </svg>
+            animation:`lanternSway ${ln.swayDur}s ease-in-out ${ln.delay}s infinite`,
+            transformOrigin:'center top',
+          }}>
+            <div style={{
+              position:'absolute', top:'20%', left:'50%', transform:'translate(-50%,-50%)',
+              width:80, height:80, borderRadius:'50%',
+              background:`radial-gradient(circle, rgba(255,170,50,${0.3+warmth*0.15}), rgba(255,120,20,0.08), transparent 70%)`,
+              filter:'blur(14px)',
+              animation:`lanternFlicker 2.5s ease-in-out ${ln.delay+0.3}s infinite`,
+            }}/>
+            <svg width="20" height="28" viewBox="0 0 20 28" style={{ display:'block' }}>
+              <ellipse cx="10" cy="12" rx="8" ry="10" fill="rgba(255,190,90,0.75)" stroke="rgba(200,150,80,0.4)" strokeWidth="0.5"/>
+              <ellipse cx="10" cy="12" rx="5.5" ry="7" fill="rgba(255,210,120,0.5)"/>
+              <circle cx="10" cy="12" r="3" fill="rgba(255,240,180,0.8)"
+                style={{animation:`lanternFlicker 2s ease-in-out ${ln.delay+0.5}s infinite`}}/>
+              <ellipse cx="10" cy="3" rx="3.5" ry="2" fill="none" stroke="rgba(180,140,80,0.35)" strokeWidth="0.5"/>
+              <path d="M8,22 Q10,26 12,22" stroke="rgba(180,140,80,0.3)" strokeWidth="0.5" fill="none"/>
+            </svg>
+          </div>
         </div>
       ))}
 
@@ -1035,6 +1016,34 @@ export default function TimerPage() {
         progress={progress} theme={theme}
         treeShake={treeShake} shimmer={shimmer}
       />
+
+      {/* ══ MAGICAL TREE ENERGY (grows with card progress) ══ */}
+      {isActive && cardsProgress > 0 && (
+        <>
+          <div style={{
+            position:'absolute', zIndex:7, pointerEvents:'none',
+            left:'22%', bottom:'5%', width:'8%', height:`${4 + cardsProgress * 30}%`,
+            background:`linear-gradient(to top, ${theme.glow}${(cardsProgress*0.15).toFixed(3)}) 0%, ${theme.glow}${(cardsProgress*0.05).toFixed(3)}) 60%, transparent 100%)`,
+            filter:'blur(14px)',
+            transition:'height 2s ease-out',
+            mixBlendMode:'screen',
+          }}/>
+          {Array.from({length:Math.min(10, Math.floor(cardsProgress * 12))}, (_, i) => ({
+            id:i, x:21+((i*3.1)%10), delay:(i*0.9)%7, dur:5+(i%4)*1.2,
+            size:2+(i%3), yStart:6+(i*4.3)%28,
+          })).map(p => (
+            <div key={`energy${p.id}`} style={{
+              position:'absolute', zIndex:8, pointerEvents:'none',
+              left:`${p.x}%`, bottom:`${p.yStart}%`,
+              width:p.size, height:p.size, borderRadius:'50%',
+              background:theme.accent,
+              boxShadow:`0 0 ${p.size*4}px ${theme.glow}0.7), 0 0 ${p.size*8}px ${theme.glow}0.25)`,
+              animation:`energyMote ${p.dur}s ease-in-out ${p.delay}s infinite`,
+              opacity:cardsProgress * 0.75,
+            }}/>
+          ))}
+        </>
+      )}
 
       {/* Intention banner */}
       {intention && isActive && (
@@ -1433,13 +1442,6 @@ export default function TimerPage() {
         @keyframes wetSheen{
           0%,100%{opacity:0.6} 50%{opacity:1}
         }
-        @keyframes snowFall{
-          0%{transform:translateY(-10px) translateX(0);opacity:0}
-          8%{opacity:var(--so,0.7)}
-          50%{transform:translateY(50vh) translateX(var(--drift,10px))}
-          92%{opacity:var(--so,0.5)}
-          100%{transform:translateY(100vh) translateX(calc(var(--drift,10px)*-0.5));opacity:0}
-        }
         @keyframes mistDrift{
           0%,100%{transform:translateX(-8%) scaleX(1);opacity:0.15}
           30%{transform:translateX(5%) scaleX(1.1);opacity:0.3}
@@ -1500,19 +1502,37 @@ export default function TimerPage() {
           50%{transform:translateY(-55px) scale(2.8);opacity:0.07}
           100%{transform:translateY(-110px) scale(4.5);opacity:0}
         }
-        @keyframes snailBob{
-          0%,100%{transform:translateY(0) rotate(0deg)}
-          50%{transform:translateY(-2px) rotate(0.5deg)}
+        @keyframes lanternDrift{
+          0%{transform:translateX(0) translateY(0)}
+          25%{transform:translateX(30px) translateY(-8px)}
+          50%{transform:translateX(-15px) translateY(5px)}
+          75%{transform:translateX(20px) translateY(-12px)}
+          100%{transform:translateX(0) translateY(0)}
         }
         @keyframes lanternSway{
-          0%,100%{transform:rotate(-3deg)}
-          50%{transform:rotate(3deg)}
+          0%,100%{transform:rotate(-8deg)}
+          30%{transform:rotate(6deg)}
+          70%{transform:rotate(-5deg)}
         }
         @keyframes lanternFlicker{
           0%,100%{opacity:0.6;transform:translate(-50%,-50%) scale(1)}
           20%{opacity:0.95;transform:translate(-50%,-50%) scale(1.08)}
           45%{opacity:0.65;transform:translate(-50%,-50%) scale(0.92)}
           70%{opacity:0.9;transform:translate(-50%,-50%) scale(1.1)}
+        }
+        @keyframes energyMote{
+          0%,100%{transform:translateY(0) translateX(0);opacity:0.3}
+          20%{transform:translateY(-20px) translateX(8px);opacity:0.8}
+          40%{transform:translateY(-45px) translateX(-5px);opacity:0.6}
+          60%{transform:translateY(-70px) translateX(10px);opacity:0.9}
+          80%{transform:translateY(-95px) translateX(-3px);opacity:0.5}
+          95%{transform:translateY(-115px) translateX(6px);opacity:0.15}
+        }
+        @keyframes cometStreak{
+          0%{transform:rotate(18deg) translateX(-50px) scaleX(0.1);opacity:0}
+          8%{opacity:0.6;transform:rotate(18deg) translateX(0) scaleX(0.6)}
+          20%{opacity:1;transform:rotate(18deg) translateX(80px) scaleX(1)}
+          100%{transform:rotate(18deg) translateX(900px) scaleX(0.3);opacity:0}
         }
       `}</style>
     </div>
