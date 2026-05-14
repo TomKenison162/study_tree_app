@@ -155,6 +155,8 @@ export default function TimerPage() {
   const [rainOn, setRainOn] = useState(false);
   const [weather, setWeather] = useState('clear');
   const weatherTimerRef = useRef(null);
+  const [shootingStars, setShootingStars] = useState([]);
+  const shootingStarRef = useRef(null);
 
   const markInteraction = useCallback(() => { lastInteractionRef.current = Date.now(); }, []);
 
@@ -265,6 +267,24 @@ export default function TimerPage() {
     };
     cycle();
     return () => clearTimeout(weatherTimerRef.current);
+  }, [isActive]);
+
+  /* Shooting stars — spawn randomly during active sessions */
+  useEffect(() => {
+    if (!isActive) { clearTimeout(shootingStarRef.current); return; }
+    const spawn = () => {
+      const delay = 14000 + Math.random() * 28000;
+      shootingStarRef.current = setTimeout(() => {
+        const id = Date.now();
+        const startX = 4 + Math.random() * 38;
+        const startY = 1 + Math.random() * 14;
+        setShootingStars(s => [...s, { id, startX, startY }]);
+        setTimeout(() => setShootingStars(s => s.filter(x => x.id !== id)), 1800);
+        spawn();
+      }, delay);
+    };
+    spawn();
+    return () => clearTimeout(shootingStarRef.current);
   }, [isActive]);
 
   /* Timer tick */
@@ -434,8 +454,8 @@ export default function TimerPage() {
     setShowCelebration(false); setBirdFlying(false);
     setDoneSparkles([]); setRedoSparkles([]); setFloaters([]); setPetals([]);
     clearTimeout(guestLeaveRef.current); clearTimeout(guestSpawnRef.current);
-    clearTimeout(weatherTimerRef.current);
-    setGuest(null); setWeather('clear');
+    clearTimeout(weatherTimerRef.current); clearTimeout(shootingStarRef.current);
+    setGuest(null); setWeather('clear'); setShootingStars([]);
   }, [totalSeconds]);
 
   const fireFloater = (kind) => {
@@ -802,6 +822,127 @@ export default function TimerPage() {
             opacity:nightOp*0.4, filter:'blur(35px)', borderRadius:'50%',
           }}/>
         </>
+      )}
+
+      {/* ══ SHOOTING STARS (night sky) ══ */}
+      {nightOp > 0.2 && shootingStars.map(s => (
+        <div key={s.id} style={{
+          position:'absolute', zIndex:3, pointerEvents:'none',
+          left:`${s.startX}%`, top:`${s.startY}%`,
+          width:70, height:2.5,
+          background:'linear-gradient(90deg, transparent 0%, rgba(255,248,220,0.15) 20%, #fff8e0 60%, #f5c870 85%, transparent 100%)',
+          borderRadius:1.5, transform:'rotate(25deg)',
+          boxShadow:'0 0 10px 3px rgba(255,248,200,0.5)',
+          animation:'shootingStarStreak 1.5s ease-out forwards',
+          opacity: nightOp,
+        }}/>
+      ))}
+
+      {/* ══ COZY CAMPFIRE (dusk/night) ══ */}
+      {duskOp > 0.3 && isActive && (
+        <div style={{
+          position:'absolute', zIndex:7, pointerEvents:'none',
+          left:'7%', bottom:'17%',
+        }}>
+          <div style={{
+            position:'absolute', bottom:5, left:'50%', transform:'translateX(-50%)',
+            width:70, height:70, borderRadius:'50%',
+            background:'radial-gradient(circle, rgba(255,160,40,0.35), rgba(255,100,20,0.12), transparent)',
+            filter:'blur(12px)',
+            animation:'campfireGlow 2s ease-in-out infinite',
+            opacity:duskOp * 0.8,
+          }}/>
+          <svg width="32" height="36" viewBox="0 0 32 36" style={{ display:'block' }}>
+            <ellipse cx="8" cy="34" rx="10" ry="2.2" fill="#5a3018" transform="rotate(-12 8 34)"/>
+            <ellipse cx="24" cy="34" rx="10" ry="2.2" fill="#4a2810" transform="rotate(12 24 34)"/>
+            <ellipse cx="16" cy="33" rx="3" ry="1.2" fill="#6a4020"/>
+            <path d="M16,32 Q12,25 14,18 Q16,12 16,8 Q16,12 18,18 Q20,25 16,32"
+              fill="#ff8020" opacity="0.9" style={{animation:'flameSway1 0.8s ease-in-out infinite', transformOrigin:'16px 32px'}}/>
+            <path d="M14,32 Q10,27 12,22 Q14,16 14,12 Q15,16 16,22 Q18,27 14,32"
+              fill="#ffaa30" opacity="0.7" style={{animation:'flameSway2 1.1s ease-in-out infinite', transformOrigin:'14px 32px'}}/>
+            <path d="M18,32 Q20,27 19,22 Q18,18 18,14 Q17,18 16,22 Q15,27 18,32"
+              fill="#ffd060" opacity="0.6" style={{animation:'flameSway3 0.9s ease-in-out infinite', transformOrigin:'18px 32px'}}/>
+            <path d="M16,32 Q14.5,28 15.5,25 Q16,22 16,20 Q16,22 16.5,25 Q17.5,28 16,32"
+              fill="#fff0a0" opacity="0.8" style={{animation:'flameSway1 0.7s ease-in-out infinite', transformOrigin:'16px 32px'}}/>
+            <circle cx="13" cy="28" r="1" fill="#ff6020" opacity="0.6" style={{animation:'emberFloat 2s ease-out infinite'}}/>
+            <circle cx="19" cy="26" r="0.7" fill="#ffa040" opacity="0.5" style={{animation:'emberFloat 2.5s ease-out 0.5s infinite'}}/>
+            <circle cx="16" cy="24" r="0.5" fill="#ffcc60" opacity="0.4" style={{animation:'emberFloat 3s ease-out 1s infinite'}}/>
+          </svg>
+          {[0,1,2].map(i => (
+            <div key={`smoke${i}`} style={{
+              position:'absolute', bottom:28, left:12+i*4,
+              width:4+i*2, height:4+i*2, borderRadius:'50%',
+              background:'rgba(160,150,140,0.2)',
+              filter:'blur(3px)',
+              animation:`smokeRise ${3+i*0.8}s ease-out ${i*0.6}s infinite`,
+            }}/>
+          ))}
+        </div>
+      )}
+
+      {/* ══ TINY SNAIL (crawls up trunk with progress) ══ */}
+      {isActive && progress > 0.05 && (
+        <div style={{
+          position:'absolute', zIndex:8, pointerEvents:'none',
+          left:'23.5%',
+          bottom:`${19 + progress * 50}%`,
+          transition:'bottom 3s ease-out',
+          animation:'snailBob 3.5s ease-in-out infinite',
+        }}>
+          <svg width="18" height="15" viewBox="0 0 18 15" style={{ display:'block', transform:'scaleX(-1)' }}>
+            <ellipse cx="11" cy="5.5" rx="5.5" ry="5" fill="#c49060"/>
+            <ellipse cx="11" cy="5.5" rx="4.2" ry="3.8" fill="#d4a878"/>
+            <path d="M11,5.5 Q13.5,3.5 12,2.5 Q10,1.8 9.5,3.5 Q9,5 10.5,5.5 Q12,6.5 12.5,5" stroke="#a07040" strokeWidth="0.6" fill="none"/>
+            <ellipse cx="6.5" cy="11.5" rx="7" ry="2.8" fill="#8a9a6a"/>
+            <ellipse cx="6.5" cy="11" rx="5" ry="1.8" fill="#9aaa7a" opacity="0.5"/>
+            <ellipse cx="1.8" cy="9.5" rx="2.5" ry="2" fill="#8a9a6a"/>
+            <line x1="1.2" y1="9" x2="-0.5" y2="5.5" stroke="#7a8a5a" strokeWidth="0.7" strokeLinecap="round"/>
+            <circle cx="-0.5" cy="5.5" r="0.9" fill="#2a2a2a"/>
+            <circle cx="-0.2" cy="5.2" r="0.35" fill="white" opacity="0.8"/>
+            <line x1="2.8" y1="8.5" x2="1.5" y2="6" stroke="#7a8a5a" strokeWidth="0.7" strokeLinecap="round"/>
+            <circle cx="1.5" cy="6" r="0.9" fill="#2a2a2a"/>
+            <circle cx="1.8" cy="5.7" r="0.35" fill="white" opacity="0.8"/>
+            <circle cx="1" cy="10.5" r="1.2" fill="#ffb0b0" opacity="0.35"/>
+          </svg>
+          <div style={{
+            position:'absolute', top:12, left:10, width:20, height:1,
+            background:'linear-gradient(90deg, rgba(180,200,160,0.35), transparent)',
+            borderRadius:1, filter:'blur(0.5px)',
+          }}/>
+        </div>
+      )}
+
+      {/* ══ PAPER LANTERN (dusk/night, hangs from branch) ══ */}
+      {duskOp > 0.25 && isActive && (
+        <div style={{
+          position:'absolute', zIndex:7, pointerEvents:'none',
+          left:'37%', top:'30%',
+          animation:'lanternSway 4.5s ease-in-out infinite',
+          transformOrigin:'center top',
+          opacity: Math.min(1, duskOp * 1.5),
+        }}>
+          <div style={{
+            position:'absolute', top:'35%', left:'50%', transform:'translate(-50%,-50%)',
+            width:50, height:50, borderRadius:'50%',
+            background:'radial-gradient(circle, rgba(255,180,60,0.4), rgba(255,140,30,0.12), transparent)',
+            filter:'blur(10px)',
+            animation:'lanternFlicker 2.2s ease-in-out infinite',
+          }}/>
+          <svg width="16" height="26" viewBox="0 0 16 26" style={{ display:'block' }}>
+            <line x1="8" y1="0" x2="8" y2="5" stroke="#5a4030" strokeWidth="0.8"/>
+            <rect x="5" y="5" width="6" height="2" rx="0.5" fill="#7a6050"/>
+            <rect x="3.5" y="7" width="9" height="12" rx="2.5" fill="rgba(255,200,100,0.75)" stroke="#9a8070" strokeWidth="0.4"/>
+            <rect x="5" y="8.5" width="6" height="9" rx="1.8" fill="#ffd060" opacity="0.5"/>
+            <circle cx="8" cy="13" r="1.8" fill="#fff0a0" opacity="0.7"
+              style={{animation:'lanternFlicker 1.8s ease-in-out 0.3s infinite'}}/>
+            <rect x="5" y="19" width="6" height="1.5" rx="0.5" fill="#7a6050"/>
+            <path d="M6.5,20.5 Q8,22 9.5,20.5" stroke="#9a7050" strokeWidth="0.5" fill="none"/>
+            <line x1="7" y1="22" x2="7" y2="24" stroke="#c8585a" strokeWidth="0.5"/>
+            <circle cx="7" cy="24.5" r="0.8" fill="#c8585a" opacity="0.7"/>
+            <line x1="9" y1="22" x2="9" y2="23.5" stroke="#c8585a" strokeWidth="0.5"/>
+            <circle cx="9" cy="24" r="0.6" fill="#c8585a" opacity="0.6"/>
+          </svg>
+        </div>
       )}
 
       {/* ══ TREE SCENE ══ */}
@@ -1240,6 +1381,53 @@ export default function TimerPage() {
         @keyframes auroraWave3{
           0%,100%{transform:translateX(0%) scaleY(1);opacity:0.2}
           50%{transform:translateX(-5%) scaleY(1.5);opacity:0.7}
+        }
+        @keyframes shootingStarStreak{
+          0%{transform:rotate(25deg) translateX(0) scaleX(0.3);opacity:0}
+          8%{opacity:1;transform:rotate(25deg) translateX(20px) scaleX(1)}
+          100%{transform:rotate(25deg) translateX(420px) scaleX(0.6);opacity:0}
+        }
+        @keyframes campfireGlow{
+          0%,100%{opacity:0.6;transform:translateX(-50%) scale(1)}
+          50%{opacity:0.95;transform:translateX(-50%) scale(1.15)}
+        }
+        @keyframes flameSway1{
+          0%,100%{transform:scaleX(1) skewX(0deg)}
+          30%{transform:scaleX(0.88) skewX(3deg)}
+          70%{transform:scaleX(1.05) skewX(-2deg)}
+        }
+        @keyframes flameSway2{
+          0%,100%{transform:scaleX(1) skewX(0deg)}
+          40%{transform:scaleX(1.08) skewX(-3deg)}
+          80%{transform:scaleX(0.9) skewX(2deg)}
+        }
+        @keyframes flameSway3{
+          0%,100%{transform:scaleX(1) skewX(0deg)}
+          50%{transform:scaleX(0.92) skewX(4deg)}
+        }
+        @keyframes emberFloat{
+          0%{transform:translateY(0) translateX(0);opacity:0.7}
+          50%{opacity:0.4}
+          100%{transform:translateY(-22px) translateX(6px);opacity:0}
+        }
+        @keyframes smokeRise{
+          0%{transform:translateY(0) scale(1);opacity:0.2}
+          50%{transform:translateY(-28px) scale(2);opacity:0.1}
+          100%{transform:translateY(-55px) scale(3);opacity:0}
+        }
+        @keyframes snailBob{
+          0%,100%{transform:translateY(0) rotate(0deg)}
+          50%{transform:translateY(-1.5px) rotate(0.5deg)}
+        }
+        @keyframes lanternSway{
+          0%,100%{transform:rotate(-2.5deg)}
+          50%{transform:rotate(2.5deg)}
+        }
+        @keyframes lanternFlicker{
+          0%,100%{opacity:0.65;transform:translate(-50%,-50%) scale(1)}
+          20%{opacity:0.9;transform:translate(-50%,-50%) scale(1.06)}
+          45%{opacity:0.7;transform:translate(-50%,-50%) scale(0.94)}
+          70%{opacity:0.85;transform:translate(-50%,-50%) scale(1.08)}
         }
       `}</style>
     </div>
