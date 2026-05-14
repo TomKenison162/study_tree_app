@@ -77,13 +77,20 @@ function RabbitSVG({ alert, clicked }) {
       {/* Cheeks */}
       <circle cx="18" cy="38" r="5" fill="#d8c8b8" opacity="0.7"/>
       <circle cx="38" cy="38" r="5" fill="#d8c8b8" opacity="0.7"/>
-      {/* Eyes */}
-      <circle cx="22" cy="32" r={alert ? 4.5 : 3.5} fill="#1a0808"/>
-      <circle cx={alert?'23':'23.5'} cy={alert?'30':'30.5'} r={alert?1.8:1.2} fill="white" opacity="0.7"/>
-      <circle cx="34" cy="32" r={alert ? 4.5 : 3.5} fill="#1a0808"/>
-      <circle cx={alert?'35':'35.5'} cy={alert?'30':'30.5'} r={alert?1.8:1.2} fill="white" opacity="0.7"/>
+      {/* Eyes — big and sparkly */}
+      <circle cx="22" cy="32" r={alert ? 5.5 : 4.5} fill="#1a0808"/>
+      <circle cx={alert?'23':'23.5'} cy={alert?'29.5':'30'} r={alert?2.2:1.6} fill="white" opacity="0.85"/>
+      <circle cx="20.5" cy="31" r="0.8" fill="white" opacity="0.5"/>
+      <circle cx="34" cy="32" r={alert ? 5.5 : 4.5} fill="#1a0808"/>
+      <circle cx={alert?'35':'35.5'} cy={alert?'29.5':'30'} r={alert?2.2:1.6} fill="white" opacity="0.85"/>
+      <circle cx="32.5" cy="31" r="0.8" fill="white" opacity="0.5"/>
+      {/* Blush cheeks */}
+      <circle cx="16" cy="39" r="4.5" fill="#ffb0b0" opacity="0.45"/>
+      <circle cx="40" cy="39" r="4.5" fill="#ffb0b0" opacity="0.45"/>
       {/* Nose — pink triangle */}
       <path d="M26,38 L28,36 L30,38 Z" fill="#e8908a"/>
+      {/* Tiny heart above nose */}
+      <path d="M27.2,34.5 C26.8,33.8 25.8,33.8 25.8,34.4 C25.8,35 27.2,35.8 27.2,35.8 C27.2,35.8 28.6,35 28.6,34.4 C28.6,33.8 27.6,33.8 27.2,34.5 Z" fill="#ff8a8a" opacity="0.6"/>
       {/* Mouth */}
       <path d="M25,40 Q28,43 31,40" stroke="#a08878" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
       <line x1="28" y1="38" x2="28" y2="41" stroke="#a08878" strokeWidth="0.7"/>
@@ -143,15 +150,18 @@ function FoxSVG({ alert, clicked }) {
       <path d="M50,30 Q54,34 50,38" stroke="#d87828" strokeWidth="1.5" fill="none" opacity="0.5" strokeLinecap="round"/>
       {/* Face mask */}
       <path d="M18,36 Q32,48 46,36 Q44,25 32,25 Q20,25 18,36 Z" fill="#fef0d8"/>
-      {/* Eyes with more detail */}
-      <ellipse cx="24" cy="28" rx={eyeR} ry={eyeR*0.9} fill="#1a0808"/>
-      {alert && <circle cx="24" cy="28" r={eyeR+0.5} fill="none" stroke="#c85a18" strokeWidth="1.5" opacity="0.4"/>}
-      <circle cx={alert?'23.2':'25.2'} cy={alert?'26':'27'} r={alert?2:1.4} fill="white" opacity="0.65"/>
-      <circle cx={alert?'22':'24'} cy={alert?'27':'28'} r="0.6" fill="white" opacity="0.4"/>
-      <ellipse cx="40" cy="28" rx={eyeR} ry={eyeR*0.9} fill="#1a0808"/>
-      {alert && <circle cx="40" cy="28" r={eyeR+0.5} fill="none" stroke="#c85a18" strokeWidth="1.5" opacity="0.4"/>}
-      <circle cx={alert?'39.2':'41.2'} cy={alert?'26':'27'} r={alert?2:1.4} fill="white" opacity="0.65"/>
-      <circle cx={alert?'38':'40'} cy={alert?'27':'28'} r="0.6" fill="white" opacity="0.4"/>
+      {/* Eyes — bigger, sparklier */}
+      <ellipse cx="24" cy="28" rx={eyeR+1} ry={(eyeR+1)*0.9} fill="#1a0808"/>
+      {alert && <circle cx="24" cy="28" r={eyeR+1.5} fill="none" stroke="#c85a18" strokeWidth="1.5" opacity="0.4"/>}
+      <circle cx={alert?'23.2':'25.2'} cy={alert?'25.5':'26.5'} r={alert?2.4:1.8} fill="white" opacity="0.85"/>
+      <circle cx={alert?'22':'24'} cy={alert?'27':'28'} r="0.8" fill="white" opacity="0.5"/>
+      <ellipse cx="40" cy="28" rx={eyeR+1} ry={(eyeR+1)*0.9} fill="#1a0808"/>
+      {alert && <circle cx="40" cy="28" r={eyeR+1.5} fill="none" stroke="#c85a18" strokeWidth="1.5" opacity="0.4"/>}
+      <circle cx={alert?'39.2':'41.2'} cy={alert?'25.5':'26.5'} r={alert?2.4:1.8} fill="white" opacity="0.85"/>
+      <circle cx={alert?'38':'40'} cy={alert?'27':'28'} r="0.8" fill="white" opacity="0.5"/>
+      {/* Blush cheeks */}
+      <circle cx="18" cy="34" r="4.5" fill="#ff9090" opacity="0.35"/>
+      <circle cx="46" cy="34" r="4.5" fill="#ff9090" opacity="0.35"/>
       {/* Brow line */}
       <path d="M20,24 Q24,22.5 28,24" stroke="#a04010" strokeWidth="0.8" fill="none" opacity="0.4" strokeLinecap="round"/>
       <path d="M36,24 Q40,22.5 44,24" stroke="#a04010" strokeWidth="0.8" fill="none" opacity="0.4" strokeLinecap="round"/>
@@ -217,22 +227,25 @@ function OwlSVG({ alert, clicked }) {
       <polygon points="45,14 50,1 41,10" fill="#8a6830"/>
       <polygon points="45,13 49,4 42,10" fill="#4a3010" opacity="0.7"/>
       <line x1="48" y1="4" x2="44" y2="11" stroke="#6a5020" strokeWidth="0.6" opacity="0.5"/>
-      {/* Left eye — facial disc ring */}
-      <circle cx="22" cy="26" r={eyeOuter+1.5} fill="none" stroke="#c09850" strokeWidth="1" opacity="0.4"/>
-      <circle cx="22" cy="26" r={eyeOuter} fill="#1a0808"/>
-      <circle cx="22" cy="26" r={eyeIris} fill="#e8b020"/>
-      <circle cx="22" cy="26" r={eyeIris*0.85} fill="#d4a018" opacity="0.5"/>
+      {/* Left eye — big and sparkly */}
+      <circle cx="22" cy="26" r={eyeOuter+2} fill="none" stroke="#c09850" strokeWidth="1" opacity="0.4"/>
+      <circle cx="22" cy="26" r={eyeOuter+0.5} fill="#1a0808"/>
+      <circle cx="22" cy="26" r={eyeIris+0.5} fill="#e8b020"/>
+      <circle cx="22" cy="26" r={(eyeIris+0.5)*0.85} fill="#d4a018" opacity="0.5"/>
       <circle cx="22" cy="26" r={eyePupil} fill="#1a0808"/>
-      <circle cx={alert?'23':'23.5'} cy={alert?'24':'24.5'} r="1.8" fill="white" opacity="0.75"/>
-      <circle cx="21" cy="27.5" r="0.7" fill="white" opacity="0.3"/>
+      <circle cx={alert?'23':'23.5'} cy={alert?'23.5':'24'} r="2.2" fill="white" opacity="0.85"/>
+      <circle cx="21" cy="27.5" r="0.9" fill="white" opacity="0.4"/>
       {/* Right eye */}
-      <circle cx="40" cy="26" r={eyeOuter+1.5} fill="none" stroke="#c09850" strokeWidth="1" opacity="0.4"/>
-      <circle cx="40" cy="26" r={eyeOuter} fill="#1a0808"/>
-      <circle cx="40" cy="26" r={eyeIris} fill="#e8b020"/>
-      <circle cx="40" cy="26" r={eyeIris*0.85} fill="#d4a018" opacity="0.5"/>
+      <circle cx="40" cy="26" r={eyeOuter+2} fill="none" stroke="#c09850" strokeWidth="1" opacity="0.4"/>
+      <circle cx="40" cy="26" r={eyeOuter+0.5} fill="#1a0808"/>
+      <circle cx="40" cy="26" r={eyeIris+0.5} fill="#e8b020"/>
+      <circle cx="40" cy="26" r={(eyeIris+0.5)*0.85} fill="#d4a018" opacity="0.5"/>
       <circle cx="40" cy="26" r={eyePupil} fill="#1a0808"/>
-      <circle cx={alert?'41':'41.5'} cy={alert?'24':'24.5'} r="1.8" fill="white" opacity="0.75"/>
-      <circle cx="39" cy="27.5" r="0.7" fill="white" opacity="0.3"/>
+      <circle cx={alert?'41':'41.5'} cy={alert?'23.5':'24'} r="2.2" fill="white" opacity="0.85"/>
+      <circle cx="39" cy="27.5" r="0.9" fill="white" opacity="0.4"/>
+      {/* Blush cheeks */}
+      <circle cx="15" cy="34" r="4.5" fill="#ffb0b0" opacity="0.4"/>
+      <circle cx="47" cy="34" r="4.5" fill="#ffb0b0" opacity="0.4"/>
       {/* Beak — layered */}
       <polygon points="31,31 27,38 35,38" fill="#e8a820"/>
       <polygon points="31,34 28,37 34,37" fill="#c88010" opacity="0.6"/>
@@ -291,16 +304,21 @@ function DeerSVG({ alert, clicked }) {
       <ellipse cx="40" cy="26" rx="6" ry="4" fill="#c8a878" opacity="0.4"/>
       {/* Muzzle */}
       <ellipse cx="40" cy="40" rx="8" ry="6" fill="#c8a878"/>
-      {/* Eyes — large and gentle */}
-      <ellipse cx="32" cy="30" rx={alert?5:4} ry={alert?5.5:4.5} fill="#1a0808"/>
-      <circle cx="33" cy={alert?'28':'28.5'} r={alert?2:1.5} fill="white" opacity="0.6"/>
-      <circle cx="31.5" cy="30" r="0.6" fill="white" opacity="0.3"/>
-      <ellipse cx="48" cy="30" rx={alert?5:4} ry={alert?5.5:4.5} fill="#1a0808"/>
-      <circle cx="49" cy={alert?'28':'28.5'} r={alert?2:1.5} fill="white" opacity="0.6"/>
-      <circle cx="47.5" cy="30" r="0.6" fill="white" opacity="0.3"/>
-      {/* Eyelashes */}
-      <path d="M28,28 Q30,26 32,27" stroke="#6a4828" strokeWidth="0.7" fill="none" opacity="0.5"/>
-      <path d="M48,27 Q50,26 52,28" stroke="#6a4828" strokeWidth="0.7" fill="none" opacity="0.5"/>
+      {/* Eyes — big dewy doe eyes */}
+      <ellipse cx="32" cy="30" rx={alert?6:5} ry={alert?6.5:5.5} fill="#1a0808"/>
+      <circle cx="33.5" cy={alert?'27.5':'28'} r={alert?2.5:2} fill="white" opacity="0.8"/>
+      <circle cx="31" cy="30" r="0.9" fill="white" opacity="0.45"/>
+      <ellipse cx="48" cy="30" rx={alert?6:5} ry={alert?6.5:5.5} fill="#1a0808"/>
+      <circle cx="49.5" cy={alert?'27.5':'28'} r={alert?2.5:2} fill="white" opacity="0.8"/>
+      <circle cx="47" cy="30" r="0.9" fill="white" opacity="0.45"/>
+      {/* Eyelashes — longer */}
+      <path d="M27,27 Q29,24.5 31,26" stroke="#6a4828" strokeWidth="0.9" fill="none" opacity="0.6"/>
+      <path d="M26,29 Q28,27 30,28" stroke="#6a4828" strokeWidth="0.6" fill="none" opacity="0.4"/>
+      <path d="M49,26 Q51,24.5 53,27" stroke="#6a4828" strokeWidth="0.9" fill="none" opacity="0.6"/>
+      <path d="M50,28 Q52,27 54,29" stroke="#6a4828" strokeWidth="0.6" fill="none" opacity="0.4"/>
+      {/* Blush cheeks */}
+      <circle cx="30" cy="38" r="4.5" fill="#ffb0b0" opacity="0.4"/>
+      <circle cx="50" cy="38" r="4.5" fill="#ffb0b0" opacity="0.4"/>
       {/* Nose */}
       <ellipse cx="40" cy="42" rx="4" ry="2.5" fill="#3a2010"/>
       <ellipse cx="39" cy="41.5" rx="1.2" ry="0.7" fill="white" opacity="0.25"/>
@@ -366,14 +384,17 @@ function BearSVG({ alert, clicked }) {
         <path d="M29,26 Q35,22 41,26" stroke="#1a0808" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
         <path d="M43,26 Q49,22 55,26" stroke="#1a0808" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
       </>}
-      {/* Eyes with more depth */}
-      <circle cx="32" cy="31" r={alert?5.5:4.5} fill="#1a0808"/>
-      <circle cx="33.5" cy={alert?'29':'29.5'} r={alert?2:1.8} fill="white" opacity="0.55"/>
-      <circle cx="31.5" cy="31.5" r="0.7" fill="white" opacity="0.25"/>
-      <circle cx="52" cy="31" r={alert?5.5:4.5} fill="#1a0808"/>
-      <circle cx="53.5" cy={alert?'29':'29.5'} r={alert?2:1.8} fill="white" opacity="0.55"/>
-      <circle cx="51.5" cy="31.5" r="0.7" fill="white" opacity="0.25"/>
-      {/* Mouth */}
+      {/* Eyes — big round teddy bear eyes */}
+      <circle cx="32" cy="31" r={alert?6.5:5.5} fill="#1a0808"/>
+      <circle cx="33.5" cy={alert?'28.5':'29'} r={alert?2.5:2.2} fill="white" opacity="0.7"/>
+      <circle cx="31" cy="31.5" r="0.9" fill="white" opacity="0.35"/>
+      <circle cx="52" cy="31" r={alert?6.5:5.5} fill="#1a0808"/>
+      <circle cx="53.5" cy={alert?'28.5':'29'} r={alert?2.5:2.2} fill="white" opacity="0.7"/>
+      <circle cx="51" cy="31.5" r="0.9" fill="white" opacity="0.35"/>
+      {/* Blush cheeks */}
+      <circle cx="26" cy="42" r="5.5" fill="#ffb0b0" opacity="0.3"/>
+      <circle cx="58" cy="42" r="5.5" fill="#ffb0b0" opacity="0.3"/>
+      {/* Mouth — gentle smile */}
       <path d={alert?"M36,52 Q42,57 48,52":"M37,52 Q42,56 47,52"} stroke="#1a0808" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
       {alert && <circle cx="42" cy="53" r="2.5" fill="#c85858" opacity="0.6"/>}
       {/* Cheek ruff */}
@@ -418,6 +439,9 @@ function CatSVG({ alert, clicked }) {
       <path d="M14,30 Q18,31 19,35" stroke="#a89070" strokeWidth="0.8" fill="none" opacity="0.3"/>
       <path d="M44,26 Q39,28 39,33" stroke="#a89070" strokeWidth="1.2" fill="none" opacity="0.45"/>
       <path d="M46,30 Q42,31 41,35" stroke="#a89070" strokeWidth="0.8" fill="none" opacity="0.3"/>
+      {/* Blush cheeks */}
+      <circle cx="15" cy="36" r="4" fill="#ffb0b0" opacity="0.4"/>
+      <circle cx="45" cy="36" r="4" fill="#ffb0b0" opacity="0.4"/>
       {/* Forehead M mark */}
       <path d="M24,22 L27,20 L30,24 L33,20 L36,22" stroke="#a89070" strokeWidth="0.8" fill="none" opacity="0.35" strokeLinecap="round"/>
       {/* Eyes — legendary blue with depth */}

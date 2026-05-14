@@ -76,6 +76,23 @@ const RIPPLES = Array.from({length:8}, (_,i) => ({
   id:i, x:4+i*5.5, delay:i*0.19, dur:0.9+(i%3)*0.28, rx:13+(i%3)*5, ry:3+(i%2)*2,
 }));
 
+/* ── DYNAMIC WEATHER PARTICLES ── */
+const SNOW_FLAKES = Array.from({length:45}, (_,i) => ({
+  id:i, x:(i*2.27)%50, delay:(i*0.14)%3,
+  dur:4+(i%5)*0.8, size:1.5+(i%4), drift:((i%9)-4)*6,
+  op:0.5+(i%3)*0.15,
+}));
+const MIST_LAYERS = [
+  { top:'25%', h:'22%', blur:28, dur:22, delay:0, op:0.25 },
+  { top:'42%', h:'18%', blur:32, dur:28, delay:6, op:0.2 },
+  { top:'58%', h:'15%', blur:24, dur:18, delay:3, op:0.18 },
+];
+const WIND_STREAKS = Array.from({length:14}, (_,i) => ({
+  id:i, y:15+(i*4.7)%55, dur:1.2+(i%4)*0.3,
+  delay:i*0.25, w:15+(i%3)*12, op:0.12+(i%3)*0.06,
+}));
+const WEATHER_TYPES = ['clear','snow','mist','windy'];
+
 const serif = "'Fraunces', Georgia, serif";
 const sans  = "system-ui,-apple-system,'Helvetica Neue',sans-serif";
 const ink   = '#2d2418';
@@ -136,6 +153,8 @@ export default function TimerPage() {
   const guestSpawnRef  = useRef(null);
   const rainRef        = useRef(null);
   const [rainOn, setRainOn] = useState(false);
+  const [weather, setWeather] = useState('clear');
+  const weatherTimerRef = useRef(null);
 
   const markInteraction = useCallback(() => { lastInteractionRef.current = Date.now(); }, []);
 
@@ -230,6 +249,23 @@ export default function TimerPage() {
       rainRef.current = null;
     }
   }, [soundOn, rainOn, ensureAudioCtx]);
+
+  /* Dynamic weather cycling */
+  useEffect(() => {
+    if (!isActive) { clearTimeout(weatherTimerRef.current); return; }
+    const cycle = () => {
+      const delay = 80000 + Math.random() * 100000;
+      weatherTimerRef.current = setTimeout(() => {
+        setWeather(w => {
+          const others = WEATHER_TYPES.filter(t => t !== w);
+          return others[Math.floor(Math.random() * others.length)];
+        });
+        cycle();
+      }, delay);
+    };
+    cycle();
+    return () => clearTimeout(weatherTimerRef.current);
+  }, [isActive]);
 
   /* Timer tick */
   useEffect(() => {
@@ -398,7 +434,8 @@ export default function TimerPage() {
     setShowCelebration(false); setBirdFlying(false);
     setDoneSparkles([]); setRedoSparkles([]); setFloaters([]); setPetals([]);
     clearTimeout(guestLeaveRef.current); clearTimeout(guestSpawnRef.current);
-    setGuest(null);
+    clearTimeout(weatherTimerRef.current);
+    setGuest(null); setWeather('clear');
   }, [totalSeconds]);
 
   const fireFloater = (kind) => {
@@ -701,6 +738,72 @@ export default function TimerPage() {
         }}/>
       )}
 
+      {/* ══ DYNAMIC WEATHER: SNOW ══ */}
+      {weather === 'snow' && isActive && SNOW_FLAKES.map(s => (
+        <div key={`snow${s.id}`} style={{
+          position:'absolute', zIndex:4, pointerEvents:'none',
+          left:`${s.x}%`, top:'-10px',
+          width:s.size, height:s.size,
+          borderRadius:'50%', background:'white',
+          opacity:s.op,
+          boxShadow:'0 0 3px rgba(255,255,255,0.8)',
+          animation:`snowFall ${s.dur}s linear ${s.delay}s infinite`,
+          '--drift':`${s.drift}px`,
+        }}/>
+      ))}
+
+      {/* ══ DYNAMIC WEATHER: MIST ══ */}
+      {weather === 'mist' && isActive && MIST_LAYERS.map((m, i) => (
+        <div key={`mist${i}`} style={{
+          position:'absolute', zIndex:4, pointerEvents:'none',
+          left:'-10%', top:m.top, width:'60%', height:m.h,
+          background:'linear-gradient(90deg, transparent, rgba(200,210,225,0.3), rgba(190,200,215,0.2), transparent)',
+          filter:`blur(${m.blur}px)`,
+          opacity:m.op,
+          animation:`mistDrift ${m.dur}s ease-in-out ${m.delay}s infinite`,
+          borderRadius:'40%',
+        }}/>
+      ))}
+
+      {/* ══ DYNAMIC WEATHER: WIND ══ */}
+      {weather === 'windy' && isActive && WIND_STREAKS.map(w => (
+        <div key={`wind${w.id}`} style={{
+          position:'absolute', zIndex:4, pointerEvents:'none',
+          left:'-5%', top:`${w.y}%`,
+          width:w.w, height:1.5,
+          background:`rgba(200,215,190,${w.op})`,
+          borderRadius:1,
+          animation:`windGust ${w.dur}s linear ${w.delay}s infinite`,
+        }}/>
+      ))}
+
+      {/* ══ AURORA BOREALIS (night phase) ══ */}
+      {nightOp > 0.3 && isActive && (
+        <>
+          <div style={{
+            position:'absolute', zIndex:3, pointerEvents:'none',
+            left:'-5%', top:'2%', width:'55%', height:'22%',
+            background:'linear-gradient(180deg, transparent, rgba(80,255,140,0.12), rgba(40,200,255,0.08), transparent)',
+            animation:'auroraWave1 12s ease-in-out infinite',
+            opacity:nightOp*0.7, filter:'blur(30px)', borderRadius:'50%',
+          }}/>
+          <div style={{
+            position:'absolute', zIndex:3, pointerEvents:'none',
+            left:'8%', top:'5%', width:'42%', height:'18%',
+            background:'linear-gradient(180deg, transparent, rgba(160,80,255,0.10), rgba(80,200,200,0.06), transparent)',
+            animation:'auroraWave2 15s ease-in-out 2s infinite',
+            opacity:nightOp*0.5, filter:'blur(25px)', borderRadius:'50%',
+          }}/>
+          <div style={{
+            position:'absolute', zIndex:3, pointerEvents:'none',
+            left:'15%', top:'0%', width:'35%', height:'15%',
+            background:'linear-gradient(180deg, transparent, rgba(80,255,200,0.08), transparent)',
+            animation:'auroraWave3 10s ease-in-out 1s infinite',
+            opacity:nightOp*0.4, filter:'blur(35px)', borderRadius:'50%',
+          }}/>
+        </>
+      )}
+
       {/* ══ TREE SCENE ══ */}
       <TreeScene
         progress={progress} theme={theme}
@@ -775,6 +878,23 @@ export default function TimerPage() {
             </svg>
           </button>
 
+          {/* Weather indicator */}
+          {weather !== 'clear' && isActive && (
+            <div style={{
+              height:34, padding:'0 10px', borderRadius:17,
+              border:`0.5px solid ${line}`, background:cream,
+              display:'flex', alignItems:'center', gap:5,
+              fontSize:9, fontWeight:500, letterSpacing:'0.14em',
+              textTransform:'uppercase', fontFamily:sans, color:ink3,
+              boxShadow:'0 1px 0 rgba(255,255,255,0.6) inset',
+              animation:'fadeIn 0.6s ease-out',
+            }}>
+              {weather==='snow' && <span style={{fontSize:12}}>*</span>}
+              {weather==='mist' && <span style={{fontSize:12, opacity:0.6}}>~</span>}
+              {weather==='windy' && <span style={{fontSize:12}}>~</span>}
+              {weather}
+            </div>
+          )}
           <button onClick={()=>setSoundOn(s=>!s)} title={soundOn?'Sound on':'Sound off'} style={{ width:34, height:34, borderRadius:'50%', border:`0.5px solid ${line}`, background:cream, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 1px 0 rgba(255,255,255,0.6) inset', color:ink2 }}>
             {soundOn?(
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
@@ -1086,6 +1206,40 @@ export default function TimerPage() {
         }
         @keyframes wetSheen{
           0%,100%{opacity:0.6} 50%{opacity:1}
+        }
+        @keyframes snowFall{
+          0%{transform:translateY(-10px) translateX(0);opacity:0}
+          8%{opacity:var(--so,0.7)}
+          50%{transform:translateY(50vh) translateX(var(--drift,10px))}
+          92%{opacity:var(--so,0.5)}
+          100%{transform:translateY(100vh) translateX(calc(var(--drift,10px)*-0.5));opacity:0}
+        }
+        @keyframes mistDrift{
+          0%,100%{transform:translateX(-8%) scaleX(1);opacity:0.15}
+          30%{transform:translateX(5%) scaleX(1.1);opacity:0.3}
+          60%{transform:translateX(-3%) scaleX(0.95);opacity:0.2}
+          80%{transform:translateX(8%) scaleX(1.05);opacity:0.25}
+        }
+        @keyframes windGust{
+          0%{transform:translateX(-100%) translateY(0);opacity:0}
+          8%{opacity:1}
+          92%{opacity:0.7}
+          100%{transform:translateX(55vw) translateY(15px);opacity:0}
+        }
+        @keyframes auroraWave1{
+          0%,100%{transform:translateX(-8%) scaleY(1);opacity:0.4}
+          25%{transform:translateX(5%) scaleY(1.3);opacity:0.8}
+          50%{transform:translateX(-3%) scaleY(0.8);opacity:0.5}
+          75%{transform:translateX(8%) scaleY(1.1);opacity:0.9}
+        }
+        @keyframes auroraWave2{
+          0%,100%{transform:translateX(5%) scaleY(0.9);opacity:0.3}
+          33%{transform:translateX(-8%) scaleY(1.3);opacity:0.7}
+          66%{transform:translateX(3%) scaleY(1.4);opacity:0.5}
+        }
+        @keyframes auroraWave3{
+          0%,100%{transform:translateX(0%) scaleY(1);opacity:0.2}
+          50%{transform:translateX(-5%) scaleY(1.5);opacity:0.7}
         }
       `}</style>
     </div>
