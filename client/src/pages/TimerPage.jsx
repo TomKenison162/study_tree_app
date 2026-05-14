@@ -543,18 +543,24 @@ export default function TimerPage() {
     boxShadow:'0 1px 0 rgba(255,255,255,0.6) inset, 0 2px 12px rgba(45,36,24,0.04)',
   };
 
-  /* Sky gradients */
-  const dawnOp  = Math.max(0,1-progress*2);
-  const dayOp   = Math.max(0,1-Math.abs(progress-0.5)*2);
-  const duskOp  = Math.max(0,progress*2-1);
+  /* 4-quarter time-of-day: sunrise → midday → sunset → night */
+  const sunriseOp = 1 - c01(progress, 0.15, 0.32);
+  const middayOp  = Math.min(c01(progress, 0.12, 0.28), 1 - c01(progress, 0.42, 0.55));
+  const sunsetOp  = Math.min(c01(progress, 0.42, 0.55), 1 - c01(progress, 0.72, 0.82));
+  const nightOp   = c01(progress, 0.68, 0.82);
+  const dawnOp = sunriseOp;
+  const dayOp  = middayOp;
+  const duskOp = Math.max(sunsetOp, nightOp);
+  const warmth = c01(progress, 0.35, 0.85);
   const sunPct  = progress*88+4;
   const sunArcY = 5+Math.pow(progress*2-1,2)*28;
-  const halo1   = duskOp>0.5?'rgba(245,140,60,0.50)':'rgba(248,200,72,0.50)';
-  const halo2   = duskOp>0.5?'rgba(238,107,51,0.22)':'rgba(248,180,40,0.20)';
-  const sunMid  = duskOp>0.5?'#ffb380':'#fff1a8';
-  const sunOuter= duskOp>0.5?'#ee6b33':'#f8c548';
-  const rayCol  = duskOp>0.5?'rgba(245,160,80,0.50)':'rgba(248,210,90,0.50)';
-  const nightOp = Math.max(0,progress*2-1.4);
+  const isWarm  = sunsetOp > 0.3 || nightOp > 0.15;
+  const isMorning = sunriseOp > 0.4 && middayOp < 0.5;
+  const halo1   = isWarm?'rgba(245,140,60,0.50)':isMorning?'rgba(255,180,120,0.45)':'rgba(248,200,72,0.50)';
+  const halo2   = isWarm?'rgba(238,107,51,0.22)':isMorning?'rgba(255,160,100,0.18)':'rgba(248,180,40,0.20)';
+  const sunMid  = isWarm?'#ffb380':isMorning?'#ffd0a0':'#fff1a8';
+  const sunOuter= isWarm?'#ee6b33':isMorning?'#f0a050':'#f8c548';
+  const rayCol  = isWarm?'rgba(245,160,80,0.50)':isMorning?'rgba(255,180,120,0.45)':'rgba(248,210,90,0.50)';
   const RAYS    = Array.from({length:20},(_,i)=>i*(360/20));
   const STARS   = Array.from({length:42},(_,i)=>({ id:i, x:3+(i*17.3)%95, y:1+(i*11.7)%38, size:i%4===0?2.6:i%4===1?1.6:1.2, delay:(i*0.3)%4 }));
   const LEAVES  = Array.from({length:14},(_,i)=>({ id:i, x:5+i*6.5, delay:i*0.7, dur:5+i*0.4, size:i%3===0?8:i%3===1?5:6, col:['#7a9d6a','#c4965a','#e5b899','#9bb38a','#d8c19a'][i%5] }));
@@ -825,125 +831,204 @@ export default function TimerPage() {
       )}
 
       {/* ══ SHOOTING STARS (night sky) ══ */}
-      {nightOp > 0.2 && shootingStars.map(s => (
+      {nightOp > 0.15 && shootingStars.map(s => (
         <div key={s.id} style={{
           position:'absolute', zIndex:3, pointerEvents:'none',
           left:`${s.startX}%`, top:`${s.startY}%`,
-          width:70, height:2.5,
-          background:'linear-gradient(90deg, transparent 0%, rgba(255,248,220,0.15) 20%, #fff8e0 60%, #f5c870 85%, transparent 100%)',
-          borderRadius:1.5, transform:'rotate(25deg)',
-          boxShadow:'0 0 10px 3px rgba(255,248,200,0.5)',
-          animation:'shootingStarStreak 1.5s ease-out forwards',
+          width:160, height:4,
+          background:'linear-gradient(90deg, transparent 0%, rgba(255,248,220,0.08) 10%, rgba(255,248,220,0.35) 30%, #fff8e0 55%, #f5c870 75%, #fff8e0 88%, transparent 100%)',
+          borderRadius:2, transform:'rotate(25deg)',
+          boxShadow:'0 0 18px 6px rgba(255,248,200,0.5), 0 0 40px 10px rgba(255,248,200,0.2)',
+          animation:'shootingStarStreak 1.8s ease-out forwards',
           opacity: nightOp,
         }}/>
       ))}
 
-      {/* ══ COZY CAMPFIRE (dusk/night) ══ */}
-      {duskOp > 0.3 && isActive && (
+      {/* ══ COZY CAMPFIRE — on the ground, left of tree ══ */}
+      {duskOp > 0.15 && isActive && (
         <div style={{
-          position:'absolute', zIndex:7, pointerEvents:'none',
-          left:'7%', bottom:'17%',
+          position:'absolute', zIndex:9, pointerEvents:'none',
+          left:'5%', bottom:'3%',
         }}>
           <div style={{
-            position:'absolute', bottom:5, left:'50%', transform:'translateX(-50%)',
-            width:70, height:70, borderRadius:'50%',
-            background:'radial-gradient(circle, rgba(255,160,40,0.35), rgba(255,100,20,0.12), transparent)',
-            filter:'blur(12px)',
-            animation:'campfireGlow 2s ease-in-out infinite',
-            opacity:duskOp * 0.8,
+            position:'absolute', bottom:10, left:'50%', transform:'translateX(-50%)',
+            width:120, height:100, borderRadius:'50%',
+            background:`radial-gradient(circle, rgba(255,140,30,${0.2+warmth*0.18}), rgba(255,80,10,${0.06+warmth*0.08}), transparent)`,
+            filter:'blur(16px)',
+            animation:'campfireGlow 2.5s ease-in-out infinite',
+            opacity: duskOp * 0.85,
           }}/>
-          <svg width="32" height="36" viewBox="0 0 32 36" style={{ display:'block' }}>
-            <ellipse cx="8" cy="34" rx="10" ry="2.2" fill="#5a3018" transform="rotate(-12 8 34)"/>
-            <ellipse cx="24" cy="34" rx="10" ry="2.2" fill="#4a2810" transform="rotate(12 24 34)"/>
-            <ellipse cx="16" cy="33" rx="3" ry="1.2" fill="#6a4020"/>
-            <path d="M16,32 Q12,25 14,18 Q16,12 16,8 Q16,12 18,18 Q20,25 16,32"
-              fill="#ff8020" opacity="0.9" style={{animation:'flameSway1 0.8s ease-in-out infinite', transformOrigin:'16px 32px'}}/>
-            <path d="M14,32 Q10,27 12,22 Q14,16 14,12 Q15,16 16,22 Q18,27 14,32"
-              fill="#ffaa30" opacity="0.7" style={{animation:'flameSway2 1.1s ease-in-out infinite', transformOrigin:'14px 32px'}}/>
-            <path d="M18,32 Q20,27 19,22 Q18,18 18,14 Q17,18 16,22 Q15,27 18,32"
-              fill="#ffd060" opacity="0.6" style={{animation:'flameSway3 0.9s ease-in-out infinite', transformOrigin:'18px 32px'}}/>
-            <path d="M16,32 Q14.5,28 15.5,25 Q16,22 16,20 Q16,22 16.5,25 Q17.5,28 16,32"
-              fill="#fff0a0" opacity="0.8" style={{animation:'flameSway1 0.7s ease-in-out infinite', transformOrigin:'16px 32px'}}/>
-            <circle cx="13" cy="28" r="1" fill="#ff6020" opacity="0.6" style={{animation:'emberFloat 2s ease-out infinite'}}/>
-            <circle cx="19" cy="26" r="0.7" fill="#ffa040" opacity="0.5" style={{animation:'emberFloat 2.5s ease-out 0.5s infinite'}}/>
-            <circle cx="16" cy="24" r="0.5" fill="#ffcc60" opacity="0.4" style={{animation:'emberFloat 3s ease-out 1s infinite'}}/>
+          <svg width="52" height="58" viewBox="0 0 52 58" style={{ display:'block' }}>
+            <ellipse cx="26" cy="54" rx="23" ry="4" fill="none" stroke="#6a5a4a" strokeWidth="2" opacity="0.4"/>
+            <rect x="6" y="49" width="40" height="5" rx="2.5" fill="#5a3018" transform="rotate(-8 26 51)"/>
+            <rect x="6" y="49" width="40" height="5" rx="2.5" fill="#4a2810" transform="rotate(8 26 51)"/>
+            <rect x="14" y="47" width="24" height="4" rx="2" fill="#6a4020" transform="rotate(-3 26 49)"/>
+            <ellipse cx="26" cy="50" rx="10" ry="3" fill="#ff4010" opacity="0.3"/>
+            <ellipse cx="26" cy="50" rx="6" ry="1.8" fill="#ff8030" opacity="0.45"/>
+            <path d="M26,48 Q18,36 22,24 Q24,16 26,10 Q28,16 30,24 Q34,36 26,48"
+              fill="#ff6010" opacity="0.9" style={{animation:'flameSway1 1s ease-in-out infinite', transformOrigin:'26px 48px'}}/>
+            <path d="M26,48 Q20,38 23,28 Q25,20 26,14 Q27,20 29,28 Q32,38 26,48"
+              fill="#ff9030" opacity="0.8" style={{animation:'flameSway2 1.3s ease-in-out infinite', transformOrigin:'26px 48px'}}/>
+            <path d="M26,48 Q22,40 24,32 Q25,24 26,20 Q27,24 28,32 Q30,40 26,48"
+              fill="#ffc050" opacity="0.7" style={{animation:'flameSway3 1.1s ease-in-out infinite', transformOrigin:'26px 48px'}}/>
+            <path d="M26,48 Q24,43 25,37 Q25.5,31 26,27 Q26.5,31 27,37 Q28,43 26,48"
+              fill="#fff0a0" opacity="0.85" style={{animation:'flameSway1 0.8s ease-in-out infinite', transformOrigin:'26px 48px'}}/>
+            {[
+              {cx:22,cy:34,r:1.2,d:2.2,dl:0},{cx:30,cy:30,r:1,d:2.8,dl:0.4},
+              {cx:24,cy:26,r:0.8,d:3.2,dl:0.8},{cx:28,cy:24,r:0.7,d:2.5,dl:1.2},
+            ].map((e,i) => (
+              <circle key={i} cx={e.cx} cy={e.cy} r={e.r} fill="#ff6020" opacity="0.6"
+                style={{animation:`emberFloat ${e.d}s ease-out ${e.dl}s infinite`}}/>
+            ))}
           </svg>
           {[0,1,2].map(i => (
             <div key={`smoke${i}`} style={{
-              position:'absolute', bottom:28, left:12+i*4,
-              width:4+i*2, height:4+i*2, borderRadius:'50%',
-              background:'rgba(160,150,140,0.2)',
-              filter:'blur(3px)',
-              animation:`smokeRise ${3+i*0.8}s ease-out ${i*0.6}s infinite`,
+              position:'absolute', bottom:44, left:18+i*6,
+              width:6+i*2, height:6+i*2, borderRadius:'50%',
+              background:`rgba(160,150,140,${0.12-i*0.02})`,
+              filter:`blur(${4+i}px)`,
+              animation:`smokeRise ${4+i}s ease-out ${i*0.6}s infinite`,
             }}/>
           ))}
         </div>
       )}
 
-      {/* ══ TINY SNAIL (crawls up trunk with progress) ══ */}
+      {/* ══ SNAIL (crawls up trunk with progress) ══ */}
       {isActive && progress > 0.05 && (
         <div style={{
-          position:'absolute', zIndex:8, pointerEvents:'none',
-          left:'23.5%',
-          bottom:`${19 + progress * 50}%`,
+          position:'absolute', zIndex:10, pointerEvents:'none',
+          left:'24%',
+          bottom:`${8 + progress * 35}%`,
           transition:'bottom 3s ease-out',
           animation:'snailBob 3.5s ease-in-out infinite',
         }}>
-          <svg width="18" height="15" viewBox="0 0 18 15" style={{ display:'block', transform:'scaleX(-1)' }}>
-            <ellipse cx="11" cy="5.5" rx="5.5" ry="5" fill="#c49060"/>
-            <ellipse cx="11" cy="5.5" rx="4.2" ry="3.8" fill="#d4a878"/>
-            <path d="M11,5.5 Q13.5,3.5 12,2.5 Q10,1.8 9.5,3.5 Q9,5 10.5,5.5 Q12,6.5 12.5,5" stroke="#a07040" strokeWidth="0.6" fill="none"/>
-            <ellipse cx="6.5" cy="11.5" rx="7" ry="2.8" fill="#8a9a6a"/>
-            <ellipse cx="6.5" cy="11" rx="5" ry="1.8" fill="#9aaa7a" opacity="0.5"/>
-            <ellipse cx="1.8" cy="9.5" rx="2.5" ry="2" fill="#8a9a6a"/>
-            <line x1="1.2" y1="9" x2="-0.5" y2="5.5" stroke="#7a8a5a" strokeWidth="0.7" strokeLinecap="round"/>
-            <circle cx="-0.5" cy="5.5" r="0.9" fill="#2a2a2a"/>
-            <circle cx="-0.2" cy="5.2" r="0.35" fill="white" opacity="0.8"/>
-            <line x1="2.8" y1="8.5" x2="1.5" y2="6" stroke="#7a8a5a" strokeWidth="0.7" strokeLinecap="round"/>
-            <circle cx="1.5" cy="6" r="0.9" fill="#2a2a2a"/>
-            <circle cx="1.8" cy="5.7" r="0.35" fill="white" opacity="0.8"/>
-            <circle cx="1" cy="10.5" r="1.2" fill="#ffb0b0" opacity="0.35"/>
+          <svg width="32" height="26" viewBox="0 0 32 26" style={{ display:'block', transform:'scaleX(-1)' }}>
+            <ellipse cx="20" cy="9.5" rx="9.5" ry="8.5" fill="#c49060"/>
+            <ellipse cx="20" cy="9.5" rx="7.5" ry="6.5" fill="#d4a878"/>
+            <path d="M20,9.5 Q24,6 22.5,3.5 Q20,1 17,3.5 Q14.5,6 17.5,9.5 Q20.5,12.5 22,9" stroke="#a07040" strokeWidth="0.8" fill="none"/>
+            <ellipse cx="11" cy="20" rx="12" ry="4.8" fill="#8a9a6a"/>
+            <ellipse cx="11" cy="19" rx="9" ry="3.2" fill="#9aaa7a" opacity="0.5"/>
+            <ellipse cx="3" cy="16.5" rx="4" ry="3.2" fill="#8a9a6a"/>
+            <line x1="2" y1="15.5" x2="-1" y2="9" stroke="#7a8a5a" strokeWidth="1" strokeLinecap="round"/>
+            <circle cx="-1" cy="9" r="1.6" fill="#2a2a2a"/>
+            <circle cx="-0.5" cy="8.5" r="0.6" fill="white" opacity="0.8"/>
+            <line x1="4.5" y1="14.5" x2="2.5" y2="10" stroke="#7a8a5a" strokeWidth="1" strokeLinecap="round"/>
+            <circle cx="2.5" cy="10" r="1.6" fill="#2a2a2a"/>
+            <circle cx="3" cy="9.5" r="0.6" fill="white" opacity="0.8"/>
+            <circle cx="1.5" cy="18" r="2.2" fill="#ffb0b0" opacity="0.4"/>
+            <path d="M1,18 Q3,20 5,18" stroke="#6a7a5a" strokeWidth="0.5" fill="none" strokeLinecap="round"/>
           </svg>
           <div style={{
-            position:'absolute', top:12, left:10, width:20, height:1,
-            background:'linear-gradient(90deg, rgba(180,200,160,0.35), transparent)',
+            position:'absolute', top:20, left:16, width:35, height:1.5,
+            background:'linear-gradient(90deg, rgba(180,200,160,0.4), transparent)',
             borderRadius:1, filter:'blur(0.5px)',
           }}/>
         </div>
       )}
 
-      {/* ══ PAPER LANTERN (dusk/night, hangs from branch) ══ */}
-      {duskOp > 0.25 && isActive && (
-        <div style={{
-          position:'absolute', zIndex:7, pointerEvents:'none',
-          left:'37%', top:'30%',
-          animation:'lanternSway 4.5s ease-in-out infinite',
+      {/* ══ PAPER LANTERNS (sunset/night, near tree branches) ══ */}
+      {duskOp > 0.15 && isActive && [
+        { left:'13%', bottom:'42%', delay:0, scale:0.85, swayDur:4.5 },
+        { left:'33%', bottom:'48%', delay:0.8, scale:0.8, swayDur:5 },
+        { left:'22%', bottom:'38%', delay:1.6, scale:0.7, swayDur:4 },
+        { left:'40%', bottom:'44%', delay:2.2, scale:0.75, swayDur:5.5 },
+      ].map((ln, idx) => (
+        <div key={`lantern${idx}`} style={{
+          position:'absolute', zIndex:8, pointerEvents:'none',
+          left:ln.left, bottom:ln.bottom,
+          animation:`lanternSway ${ln.swayDur}s ease-in-out ${ln.delay}s infinite`,
           transformOrigin:'center top',
-          opacity: Math.min(1, duskOp * 1.5),
+          opacity: Math.min(1, duskOp * 1.4) * (0.55 + warmth * 0.45),
+          transform:`scale(${ln.scale})`,
         }}>
           <div style={{
-            position:'absolute', top:'35%', left:'50%', transform:'translate(-50%,-50%)',
+            position:'absolute', top:'28%', left:'50%', transform:'translate(-50%,-50%)',
             width:50, height:50, borderRadius:'50%',
-            background:'radial-gradient(circle, rgba(255,180,60,0.4), rgba(255,140,30,0.12), transparent)',
+            background:`radial-gradient(circle, rgba(255,180,60,${0.25+warmth*0.12}), rgba(255,140,30,0.05), transparent)`,
             filter:'blur(10px)',
-            animation:'lanternFlicker 2.2s ease-in-out infinite',
+            animation:`lanternFlicker 2.2s ease-in-out ${ln.delay+0.3}s infinite`,
           }}/>
-          <svg width="16" height="26" viewBox="0 0 16 26" style={{ display:'block' }}>
-            <line x1="8" y1="0" x2="8" y2="5" stroke="#5a4030" strokeWidth="0.8"/>
-            <rect x="5" y="5" width="6" height="2" rx="0.5" fill="#7a6050"/>
-            <rect x="3.5" y="7" width="9" height="12" rx="2.5" fill="rgba(255,200,100,0.75)" stroke="#9a8070" strokeWidth="0.4"/>
-            <rect x="5" y="8.5" width="6" height="9" rx="1.8" fill="#ffd060" opacity="0.5"/>
-            <circle cx="8" cy="13" r="1.8" fill="#fff0a0" opacity="0.7"
-              style={{animation:'lanternFlicker 1.8s ease-in-out 0.3s infinite'}}/>
-            <rect x="5" y="19" width="6" height="1.5" rx="0.5" fill="#7a6050"/>
-            <path d="M6.5,20.5 Q8,22 9.5,20.5" stroke="#9a7050" strokeWidth="0.5" fill="none"/>
-            <line x1="7" y1="22" x2="7" y2="24" stroke="#c8585a" strokeWidth="0.5"/>
-            <circle cx="7" cy="24.5" r="0.8" fill="#c8585a" opacity="0.7"/>
-            <line x1="9" y1="22" x2="9" y2="23.5" stroke="#c8585a" strokeWidth="0.5"/>
-            <circle cx="9" cy="24" r="0.6" fill="#c8585a" opacity="0.6"/>
+          <svg width="18" height="30" viewBox="0 0 18 30" style={{ display:'block' }}>
+            <line x1="9" y1="0" x2="9" y2="5" stroke="#5a4030" strokeWidth="0.8"/>
+            <rect x="6" y="5" width="6" height="2" rx="0.5" fill="#7a6050"/>
+            <rect x="4" y="7" width="10" height="14" rx="3" fill="rgba(255,200,100,0.8)" stroke="#9a8070" strokeWidth="0.5"/>
+            <rect x="5.5" y="9" width="7" height="10" rx="2" fill="#ffd060" opacity="0.5"/>
+            <circle cx="9" cy="14" r="2.2" fill="#fff0a0" opacity="0.8"
+              style={{animation:`lanternFlicker 1.8s ease-in-out ${ln.delay+0.5}s infinite`}}/>
+            <rect x="6" y="21" width="6" height="1.5" rx="0.5" fill="#7a6050"/>
+            <path d="M7,22.5 Q9,25 11,22.5" stroke="#9a7050" strokeWidth="0.5" fill="none"/>
+            <line x1="8" y1="25" x2="8" y2="27.5" stroke="#c8585a" strokeWidth="0.5"/>
+            <circle cx="8" cy="28" r="0.7" fill="#c8585a" opacity="0.7"/>
+            <line x1="10" y1="25" x2="10" y2="27" stroke="#c8585a" strokeWidth="0.5"/>
+            <circle cx="10" cy="27.5" r="0.6" fill="#c8585a" opacity="0.6"/>
           </svg>
         </div>
+      ))}
+
+      {/* ══ FOREGROUND COZY WARMTH — progressive ══ */}
+      {isActive && warmth > 0 && (
+        <>
+          <div style={{
+            position:'absolute', zIndex:6, pointerEvents:'none',
+            left:0, bottom:0, width:'50%', height:'18%',
+            background:`linear-gradient(to top, rgba(255,160,50,${(warmth*0.08).toFixed(3)}), transparent)`,
+            transition:'all 3s',
+          }}/>
+          <div style={{
+            position:'absolute', zIndex:1, pointerEvents:'none',
+            left:0, top:0, width:'50%', height:'100%',
+            background: nightOp > 0.3
+              ? `linear-gradient(180deg, rgba(15,10,40,${(nightOp*0.18).toFixed(3)}), transparent 60%)`
+              : sunsetOp > 0.3
+                ? `linear-gradient(180deg, rgba(80,40,20,${(sunsetOp*0.05).toFixed(3)}), transparent 50%)`
+                : 'none',
+            transition:'background 4s',
+          }}/>
+        </>
       )}
+
+      {/* ══ COZY GROUND DETAILS — appear progressively on grass ══ */}
+      {isActive && progress > 0.2 && [
+        { left:'3%', bottom:'4%', scale:0.9, delay:0 },
+        { left:'8%', bottom:'3.5%', scale:0.65, delay:0.3 },
+        { left:'38%', bottom:'4.5%', scale:0.8, delay:0.6 },
+      ].map((m, i) => (
+        <div key={`mush${i}`} style={{
+          position:'absolute', zIndex:10, pointerEvents:'none',
+          left:m.left, bottom:m.bottom,
+          transform:`scale(${m.scale})`,
+          opacity: Math.min(1, (progress - 0.2) * 3),
+          animation:`fadeIn 2s ease-out ${m.delay}s both`,
+        }}>
+          <svg width="14" height="16" viewBox="0 0 14 16">
+            <rect x="5" y="8" width="4" height="7" rx="1.5" fill="#d4b890"/>
+            <ellipse cx="7" cy="8" rx="7" ry="5.5" fill="#c85050"/>
+            <circle cx="4.5" cy="6.5" r="1.5" fill="white" opacity="0.7"/>
+            <circle cx="9.5" cy="7" r="1" fill="white" opacity="0.6"/>
+            <circle cx="7" cy="4.5" r="0.8" fill="white" opacity="0.5"/>
+          </svg>
+        </div>
+      ))}
+      {isActive && progress > 0.35 && [
+        { left:'1%', bottom:'3.8%', col:'#e9a8c0' },
+        { left:'35%', bottom:'3.5%', col:'#fde68a' },
+        { left:'44%', bottom:'4%', col:'#c4b5fd' },
+      ].map((f, i) => (
+        <div key={`flower${i}`} style={{
+          position:'absolute', zIndex:10, pointerEvents:'none',
+          left:f.left, bottom:f.bottom,
+          opacity: Math.min(1, (progress - 0.35) * 3),
+        }}>
+          <svg width="10" height="12" viewBox="0 0 10 12">
+            <line x1="5" y1="6" x2="5" y2="12" stroke="#5a8a4a" strokeWidth="1"/>
+            {[0,72,144,216,288].map(deg => (
+              <circle key={deg} cx={5+Math.cos(deg*Math.PI/180)*2.5} cy={5+Math.sin(deg*Math.PI/180)*2.5}
+                r="2" fill={f.col} opacity="0.8"/>
+            ))}
+            <circle cx="5" cy="5" r="1.5" fill="#ffd060"/>
+          </svg>
+        </div>
+      ))}
 
       {/* ══ TREE SCENE ══ */}
       <TreeScene
@@ -1383,51 +1468,51 @@ export default function TimerPage() {
           50%{transform:translateX(-5%) scaleY(1.5);opacity:0.7}
         }
         @keyframes shootingStarStreak{
-          0%{transform:rotate(25deg) translateX(0) scaleX(0.3);opacity:0}
-          8%{opacity:1;transform:rotate(25deg) translateX(20px) scaleX(1)}
-          100%{transform:rotate(25deg) translateX(420px) scaleX(0.6);opacity:0}
+          0%{transform:rotate(25deg) translateX(0) scaleX(0.15);opacity:0}
+          5%{opacity:1;transform:rotate(25deg) translateX(40px) scaleX(1)}
+          100%{transform:rotate(25deg) translateX(650px) scaleX(0.4);opacity:0}
         }
         @keyframes campfireGlow{
-          0%,100%{opacity:0.6;transform:translateX(-50%) scale(1)}
-          50%{opacity:0.95;transform:translateX(-50%) scale(1.15)}
+          0%,100%{opacity:0.5;transform:translateX(-50%) scale(1)}
+          50%{opacity:1;transform:translateX(-50%) scale(1.2)}
         }
         @keyframes flameSway1{
           0%,100%{transform:scaleX(1) skewX(0deg)}
-          30%{transform:scaleX(0.88) skewX(3deg)}
-          70%{transform:scaleX(1.05) skewX(-2deg)}
+          30%{transform:scaleX(0.88) skewX(4deg)}
+          70%{transform:scaleX(1.06) skewX(-3deg)}
         }
         @keyframes flameSway2{
           0%,100%{transform:scaleX(1) skewX(0deg)}
-          40%{transform:scaleX(1.08) skewX(-3deg)}
-          80%{transform:scaleX(0.9) skewX(2deg)}
+          40%{transform:scaleX(1.1) skewX(-4deg)}
+          80%{transform:scaleX(0.88) skewX(3deg)}
         }
         @keyframes flameSway3{
           0%,100%{transform:scaleX(1) skewX(0deg)}
-          50%{transform:scaleX(0.92) skewX(4deg)}
+          50%{transform:scaleX(0.9) skewX(5deg)}
         }
         @keyframes emberFloat{
-          0%{transform:translateY(0) translateX(0);opacity:0.7}
-          50%{opacity:0.4}
-          100%{transform:translateY(-22px) translateX(6px);opacity:0}
+          0%{transform:translateY(0) translateX(0);opacity:0.8}
+          40%{opacity:0.5}
+          100%{transform:translateY(-50px) translateX(12px);opacity:0}
         }
         @keyframes smokeRise{
-          0%{transform:translateY(0) scale(1);opacity:0.2}
-          50%{transform:translateY(-28px) scale(2);opacity:0.1}
-          100%{transform:translateY(-55px) scale(3);opacity:0}
+          0%{transform:translateY(0) scale(1);opacity:0.16}
+          50%{transform:translateY(-55px) scale(2.8);opacity:0.07}
+          100%{transform:translateY(-110px) scale(4.5);opacity:0}
         }
         @keyframes snailBob{
           0%,100%{transform:translateY(0) rotate(0deg)}
-          50%{transform:translateY(-1.5px) rotate(0.5deg)}
+          50%{transform:translateY(-2px) rotate(0.5deg)}
         }
         @keyframes lanternSway{
-          0%,100%{transform:rotate(-2.5deg)}
-          50%{transform:rotate(2.5deg)}
+          0%,100%{transform:rotate(-3deg)}
+          50%{transform:rotate(3deg)}
         }
         @keyframes lanternFlicker{
-          0%,100%{opacity:0.65;transform:translate(-50%,-50%) scale(1)}
-          20%{opacity:0.9;transform:translate(-50%,-50%) scale(1.06)}
-          45%{opacity:0.7;transform:translate(-50%,-50%) scale(0.94)}
-          70%{opacity:0.85;transform:translate(-50%,-50%) scale(1.08)}
+          0%,100%{opacity:0.6;transform:translate(-50%,-50%) scale(1)}
+          20%{opacity:0.95;transform:translate(-50%,-50%) scale(1.08)}
+          45%{opacity:0.65;transform:translate(-50%,-50%) scale(0.92)}
+          70%{opacity:0.9;transform:translate(-50%,-50%) scale(1.1)}
         }
       `}</style>
     </div>

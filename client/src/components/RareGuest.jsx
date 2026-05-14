@@ -4,7 +4,7 @@ export const GUEST_CONFIG = {
   rabbit: {
     name: 'Rabbit', rarity: 'Common', rarityMark: '●',
     color: '#8a7060', glowColor: 'rgba(160,130,110,0.7)',
-    pos: { bottom: '18%', left: '6%' },
+    pos: { bottom: '5%', left: '5%' },
     w: 56, h: 72,
     leaveAnim: 'rabbitHop',
     idleAnim: 'rabbitNibble',
@@ -12,7 +12,7 @@ export const GUEST_CONFIG = {
   fox: {
     name: 'Fox', rarity: 'Common', rarityMark: '●',
     color: '#b05a18', glowColor: 'rgba(200,100,30,0.7)',
-    pos: { bottom: '19%', left: '8%' },
+    pos: { bottom: '4%', left: '6%' },
     w: 68, h: 84,
     leaveAnim: 'foxRun',
     idleAnim: 'foxIdle',
@@ -20,7 +20,7 @@ export const GUEST_CONFIG = {
   owl: {
     name: 'Owl', rarity: 'Rare', rarityMark: '■',
     color: '#2a5a9a', glowColor: 'rgba(42,90,180,0.7)',
-    pos: { top: '32%', left: '16%' },
+    pos: { bottom: '40%', left: '14%' },
     w: 62, h: 78,
     leaveAnim: 'owlFly',
     idleAnim: 'owlIdle',
@@ -28,7 +28,7 @@ export const GUEST_CONFIG = {
   deer: {
     name: 'Deer', rarity: 'Rare', rarityMark: '■',
     color: '#8a6030', glowColor: 'rgba(160,120,60,0.7)',
-    pos: { bottom: '20%', left: '4%' },
+    pos: { bottom: '4%', left: '2%' },
     w: 80, h: 96,
     leaveAnim: 'deerLeap',
     idleAnim: 'deerIdle',
@@ -36,7 +36,7 @@ export const GUEST_CONFIG = {
   bear: {
     name: 'Bear', rarity: 'Epic', rarityMark: '◆',
     color: '#6a38b0', glowColor: 'rgba(106,56,180,0.7)',
-    pos: { bottom: '22%', left: '34%' },
+    pos: { bottom: '4%', left: '32%' },
     w: 84, h: 100,
     leaveAnim: 'bearLeave',
     idleAnim: 'bearIdle',
@@ -44,7 +44,7 @@ export const GUEST_CONFIG = {
   cat: {
     name: 'Cat', rarity: 'Legendary', rarityMark: '★',
     color: '#b89010', glowColor: 'rgba(200,160,20,0.8)',
-    pos: { top: '36%', left: '27%' },
+    pos: { bottom: '38%', left: '26%' },
     w: 68, h: 84,
     leaveAnim: 'catVanish',
     idleAnim: 'catShimmer',
