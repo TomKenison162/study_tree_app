@@ -81,6 +81,27 @@ export const TREE_THEMES = {
     glow: 'rgba(100,70,40,', petal: '#8a6040',
     canopyScale: 1.0, canopyDropY: 0,
   },
+  wisteria: {
+    name: 'Wisteria', shape: 'wisteria',
+    leafDark: '#4a2868', leafMid: '#7a4ea8', leafLight: '#c8a8e0',
+    accent: '#8a60b8', accentDeep: '#4a2868',
+    glow: 'rgba(180,140,220,', petal: '#d4b8f0',
+    canopyScale: 1.0, canopyDropY: 0,
+  },
+  baobab: {
+    name: 'Baobab', shape: 'baobab',
+    leafDark: '#2a4a1e', leafMid: '#4a7a35', leafLight: '#7aaa5a',
+    accent: '#6a5a3a', accentDeep: '#4a3a20',
+    glow: 'rgba(120,100,70,', petal: '#8a8060',
+    canopyScale: 1.0, canopyDropY: 0,
+  },
+  crystal: {
+    name: 'Crystal', shape: 'crystal',
+    leafDark: '#1a3a5a', leafMid: '#3a7aaa', leafLight: '#a0d8ff',
+    accent: '#50a0d0', accentDeep: '#1a4a6a',
+    glow: 'rgba(100,180,240,', petal: '#b0e0ff',
+    canopyScale: 1.0, canopyDropY: 0,
+  },
 };
 
 /* ════════════════════════════════════════════════════════════
@@ -292,6 +313,48 @@ export function TinyTreeIcon({ themeKey, size = 32, opacity = 1 }) {
         <polygon points="11,3 6,10 16,10" fill={theme.leafMid}/>
         <polygon points="11,6 5,14 17,14" fill={theme.leafDark} opacity="0.9"/>
         <polygon points="11,9 6,16 16,16" fill={theme.leafLight} opacity="0.8"/>
+      </svg>
+    );
+  }
+  if (theme.shape === 'wisteria') {
+    return (
+      <svg width={size} height={h} viewBox="0 0 22 26" style={{ opacity }}>
+        <path d="M11,24 C10.5,19 10,16 11,12" stroke="#5a3820" strokeWidth="2" fill="none" strokeLinecap="round"/>
+        <path d="M10,16 C7,15 4,14 2,13" stroke="#5a3820" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+        <path d="M11,14 C14,13 17,12 19,11" stroke="#5a3820" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+        {[3,7,11,15,19].map((x,i) => (
+          <g key={i}>
+            <circle cx={x} cy={10+i%2} r="2.5" fill={theme.leafLight} opacity="0.9"/>
+            <circle cx={x} cy={13+i%2} r="2" fill={theme.leafMid} opacity="0.85"/>
+            <circle cx={x} cy={15.5+i%2} r="1.5" fill={theme.leafDark} opacity="0.8"/>
+          </g>
+        ))}
+      </svg>
+    );
+  }
+  if (theme.shape === 'baobab') {
+    return (
+      <svg width={size} height={h} viewBox="0 0 22 26" style={{ opacity }}>
+        <path d="M8,24 C7,20 6,16 6.5,12 C7,9 8.5,7 11,6 C13.5,7 15,9 15.5,12 C16,16 15,20 14,24 Z" fill="#7a6050"/>
+        <path d="M9,24 C8.5,20 8,16 8.5,12 C9,10 10,8.5 11,8 C12,8.5 13,10 13.5,12 C14,16 13.5,20 13,24 Z" fill="#8a7060" opacity="0.6"/>
+        <path d="M8,7 C5,5 3,4 2,3" stroke="#5a4030" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+        <path d="M14,7 C17,5 19,4 20,3" stroke="#5a4030" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+        <circle cx="2" cy="2.5" r="2.5" fill={theme.leafMid}/>
+        <circle cx="20" cy="2.5" r="2.5" fill={theme.leafMid}/>
+        <circle cx="11" cy="5" r="3" fill={theme.leafLight} opacity="0.8"/>
+      </svg>
+    );
+  }
+  if (theme.shape === 'crystal') {
+    return (
+      <svg width={size} height={h} viewBox="0 0 22 26" style={{ opacity }}>
+        <polygon points="11,24 9,18 10,18 8,12 10,12 9,6 11,2 13,6 12,12 14,12 12,18 13,18" fill={theme.leafMid} opacity="0.85"/>
+        <polygon points="11,24 10,18 11,12 10,6 11,2 12,6 11,12 12,18" fill={theme.leafLight} opacity="0.6"/>
+        <polygon points="5,14 8,10 7,16" fill={theme.leafDark} opacity="0.7"/>
+        <polygon points="17,13 14,9 15,15" fill={theme.leafDark} opacity="0.7"/>
+        <polygon points="4,10 7,7 6,12" fill={theme.leafLight} opacity="0.5"/>
+        <polygon points="18,9 15,6 16,11" fill={theme.leafLight} opacity="0.5"/>
+        <circle cx="11" cy="2" r="1.5" fill="white" opacity="0.7"/>
       </svg>
     );
   }

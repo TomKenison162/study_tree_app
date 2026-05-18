@@ -859,6 +859,75 @@ export default function TimerPage() {
         }}/>
       ))}
 
+      {/* ══ CONSTELLATION PROGRESS MAP — your progress written in the stars ══ */}
+      {nightOp > 0.25 && isActive && cardsProgress > 0 && (() => {
+        const CSTARS = [
+          { x:25, y:36, at:0.03 },
+          { x:25, y:32, at:0.07 },
+          { x:25, y:28, at:0.12 },
+          { x:21.5, y:24, at:0.18 },
+          { x:28.5, y:24, at:0.24 },
+          { x:17.5, y:20, at:0.30 },
+          { x:25, y:21.5, at:0.36 },
+          { x:32.5, y:20, at:0.42 },
+          { x:15, y:16, at:0.48 },
+          { x:22, y:15, at:0.54 },
+          { x:28, y:15, at:0.60 },
+          { x:35, y:16, at:0.66 },
+          { x:18, y:11, at:0.72 },
+          { x:25, y:10, at:0.78 },
+          { x:32, y:11, at:0.84 },
+          { x:25, y:6,  at:0.92 },
+        ];
+        const CLINES = [
+          [0,1],[1,2],[2,3],[2,4],[3,5],[3,6],[4,6],[4,7],
+          [5,8],[5,9],[6,9],[6,10],[7,10],[7,11],
+          [8,12],[9,13],[10,13],[11,14],[12,13],[13,14],[13,15],
+        ];
+        return (
+          <div style={{ position:'absolute', inset:0, zIndex:2, pointerEvents:'none', opacity:nightOp*0.85 }}>
+            <svg width="50%" height="100%" viewBox="0 0 50 45" preserveAspectRatio="xMidYMid meet"
+              style={{ position:'absolute', left:0, top:0 }}>
+              {CLINES.map(([a,b], i) => {
+                const sa = CSTARS[a], sb = CSTARS[b];
+                const vis = Math.min(
+                  cardsProgress >= sa.at ? 1 : 0,
+                  cardsProgress >= sb.at ? 1 : 0
+                );
+                if (!vis) return null;
+                const lineOp = Math.min(1, (cardsProgress - Math.max(sa.at, sb.at)) * 8);
+                return (
+                  <line key={`cl${i}`} x1={sa.x} y1={sa.y} x2={sb.x} y2={sb.y}
+                    stroke={`rgba(180,210,255,${lineOp*0.35})`} strokeWidth="0.15"
+                    strokeLinecap="round"/>
+                );
+              })}
+              {CSTARS.map((s, i) => {
+                if (cardsProgress < s.at) return null;
+                const age = Math.min(1, (cardsProgress - s.at) * 6);
+                const isTip = i === CSTARS.length - 1;
+                const r = isTip ? 0.6 : (i < 3 ? 0.3 : 0.35);
+                return (
+                  <g key={`cs${i}`}>
+                    <circle cx={s.x} cy={s.y} r={r + 0.8} fill="none"
+                      stroke={`rgba(180,220,255,${age*0.15})`} strokeWidth="0.1"/>
+                    <circle cx={s.x} cy={s.y} r={r}
+                      fill={isTip ? '#ffe8a0' : '#d0e8ff'}
+                      opacity={age * 0.9}
+                      style={{ animation:`twinkle ${2+i%3}s ease-in-out ${(i*0.4)%3}s infinite` }}/>
+                    {isTip && (
+                      <circle cx={s.x} cy={s.y} r="1.2"
+                        fill="none" stroke="rgba(255,240,180,0.3)" strokeWidth="0.08"
+                        style={{ animation:'breathe 2s ease-in-out infinite' }}/>
+                    )}
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+        );
+      })()}
+
       {/* ══ COZY CAMPFIRE — on the ground, left of tree ══ */}
       {duskOp > 0.15 && isActive && (
         <div style={{
@@ -910,11 +979,12 @@ export default function TimerPage() {
 
       {/* ══ SKY LANTERNS (sunset/night — floating, drifting, glowing) ══ */}
       {duskOp > 0.15 && isActive && [
-        { startLeft:5,  top:'12%', delay:0,   scale:0.9,  driftDur:28, swayDur:5   },
-        { startLeft:18, top:'8%',  delay:3,   scale:0.75, driftDur:34, swayDur:6   },
-        { startLeft:32, top:'15%', delay:7,   scale:0.85, driftDur:30, swayDur:4.5 },
-        { startLeft:10, top:'20%', delay:12,  scale:0.65, driftDur:36, swayDur:5.5 },
-        { startLeft:38, top:'10%', delay:16,  scale:0.7,  driftDur:32, swayDur:4.8 },
+        { startLeft:4,  top:'10%', delay:0,   scale:1.0,  driftDur:28, swayDur:5   },
+        { startLeft:16, top:'6%',  delay:3,   scale:0.8,  driftDur:34, swayDur:6   },
+        { startLeft:30, top:'13%', delay:7,   scale:0.9,  driftDur:30, swayDur:4.5 },
+        { startLeft:9,  top:'18%', delay:12,  scale:0.7,  driftDur:36, swayDur:5.5 },
+        { startLeft:36, top:'8%',  delay:16,  scale:0.75, driftDur:32, swayDur:4.8 },
+        { startLeft:22, top:'4%',  delay:20,  scale:0.65, driftDur:38, swayDur:5.2 },
       ].map((ln, idx) => (
         <div key={`lantern${idx}`} style={{
           position:'absolute', zIndex:5, pointerEvents:'none',
@@ -928,19 +998,39 @@ export default function TimerPage() {
             transformOrigin:'center top',
           }}>
             <div style={{
-              position:'absolute', top:'20%', left:'50%', transform:'translate(-50%,-50%)',
-              width:80, height:80, borderRadius:'50%',
-              background:`radial-gradient(circle, rgba(255,170,50,${0.3+warmth*0.15}), rgba(255,120,20,0.08), transparent 70%)`,
-              filter:'blur(14px)',
+              position:'absolute', top:'30%', left:'50%', transform:'translate(-50%,-50%)',
+              width:90, height:90, borderRadius:'50%',
+              background:`radial-gradient(circle, rgba(255,180,60,${0.35+warmth*0.18}) 0%, rgba(255,130,30,0.12) 40%, transparent 70%)`,
+              filter:'blur(16px)',
               animation:`lanternFlicker 2.5s ease-in-out ${ln.delay+0.3}s infinite`,
             }}/>
-            <svg width="20" height="28" viewBox="0 0 20 28" style={{ display:'block' }}>
-              <ellipse cx="10" cy="12" rx="8" ry="10" fill="rgba(255,190,90,0.75)" stroke="rgba(200,150,80,0.4)" strokeWidth="0.5"/>
-              <ellipse cx="10" cy="12" rx="5.5" ry="7" fill="rgba(255,210,120,0.5)"/>
-              <circle cx="10" cy="12" r="3" fill="rgba(255,240,180,0.8)"
+            <div style={{
+              position:'absolute', top:'30%', left:'50%', transform:'translate(-50%,-50%)',
+              width:50, height:50, borderRadius:'50%',
+              background:`radial-gradient(circle, rgba(255,220,120,${0.2+warmth*0.1}) 0%, transparent 65%)`,
+              filter:'blur(8px)',
+            }}/>
+            <svg width="24" height="34" viewBox="0 0 24 34" style={{ display:'block' }}>
+              <defs>
+                <radialGradient id={`lg${idx}`} cx="50%" cy="45%" r="50%">
+                  <stop offset="0%" stopColor="#fff4d0" stopOpacity="0.9"/>
+                  <stop offset="40%" stopColor="#ffcc70" stopOpacity="0.8"/>
+                  <stop offset="80%" stopColor="#e8940a" stopOpacity="0.6"/>
+                  <stop offset="100%" stopColor="#c86a00" stopOpacity="0.4"/>
+                </radialGradient>
+              </defs>
+              <ellipse cx="12" cy="14" rx="9" ry="11.5" fill={`url(#lg${idx})`}/>
+              <ellipse cx="12" cy="14" rx="9" ry="11.5" fill="none" stroke="rgba(200,150,60,0.3)" strokeWidth="0.6"/>
+              <path d="M6.5,8 Q12,6 17.5,8" stroke="rgba(180,120,40,0.2)" strokeWidth="0.4" fill="none"/>
+              <path d="M5.5,12 Q12,10 18.5,12" stroke="rgba(180,120,40,0.15)" strokeWidth="0.3" fill="none"/>
+              <path d="M6,17 Q12,15 18,17" stroke="rgba(180,120,40,0.15)" strokeWidth="0.3" fill="none"/>
+              <ellipse cx="12" cy="13" rx="5" ry="6.5" fill="rgba(255,230,150,0.35)"/>
+              <ellipse cx="12" cy="12" rx="2.5" ry="3.5" fill="rgba(255,245,200,0.5)"
                 style={{animation:`lanternFlicker 2s ease-in-out ${ln.delay+0.5}s infinite`}}/>
-              <ellipse cx="10" cy="3" rx="3.5" ry="2" fill="none" stroke="rgba(180,140,80,0.35)" strokeWidth="0.5"/>
-              <path d="M8,22 Q10,26 12,22" stroke="rgba(180,140,80,0.3)" strokeWidth="0.5" fill="none"/>
+              <path d="M9,3 Q12,1.5 15,3" stroke="rgba(160,120,60,0.4)" strokeWidth="0.7" fill="none" strokeLinecap="round"/>
+              <line x1="12" y1="2" x2="12" y2="3.5" stroke="rgba(160,120,60,0.3)" strokeWidth="0.5"/>
+              <path d="M9,25.5 Q12,30 15,25.5" stroke="rgba(200,150,60,0.25)" strokeWidth="0.5" fill="none"/>
+              <line x1="12" y1="28" x2="12" y2="32" stroke="rgba(200,150,60,0.15)" strokeWidth="0.4"/>
             </svg>
           </div>
         </div>
@@ -1124,7 +1214,6 @@ export default function TimerPage() {
               boxShadow:'0 1px 0 rgba(255,255,255,0.6) inset',
               animation:'fadeIn 0.6s ease-out',
             }}>
-              {weather==='snow' && <span style={{fontSize:12}}>*</span>}
               {weather==='mist' && <span style={{fontSize:12, opacity:0.6}}>~</span>}
               {weather==='windy' && <span style={{fontSize:12}}>~</span>}
               {weather}

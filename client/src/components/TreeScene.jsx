@@ -451,6 +451,354 @@ function BirchTrunk({ tP, detailP, tr, rimLightOp, duskOp, sunAngleNorm, rimLigh
   );
 }
 
+/* ─────────────────────── WISTERIA TREE ─────────────────────── */
+function WisteriaTree({ progress, theme, sunAngleNorm, sunHeight, duskOp, rimLightOp, nightOp }) {
+  const trP  = c01(progress, 0.00, 0.14);
+  const brP  = c01(progress, 0.10, 0.30);
+  const ch1P = c01(progress, 0.25, 0.50);
+  const ch2P = c01(progress, 0.38, 0.62);
+  const ch3P = c01(progress, 0.50, 0.75);
+  const detP = c01(progress, 0.55, 0.85);
+  const tr   = 'transform 1.3s cubic-bezier(0.34,1.4,0.64,1)';
+  const shadowDx = -sunAngleNorm * 45;
+  const shadowSX = 1 + Math.abs(sunAngleNorm) * 0.5;
+
+  const CHAINS = [
+    { x:130, y:268, len:150, d:0,   p:ch1P },
+    { x:155, y:252, len:175, d:0.3, p:ch1P },
+    { x:178, y:240, len:185, d:0.6, p:ch1P },
+    { x:200, y:233, len:170, d:0.2, p:ch1P },
+    { x:222, y:228, len:155, d:0.8, p:ch2P },
+    { x:245, y:235, len:140, d:0.1, p:ch2P },
+    { x:268, y:232, len:160, d:0.5, p:ch2P },
+    { x:290, y:230, len:170, d:0.7, p:ch2P },
+    { x:310, y:230, len:168, d:0.2, p:ch2P },
+    { x:332, y:232, len:155, d:0.4, p:ch2P },
+    { x:355, y:235, len:145, d:0.9, p:ch3P },
+    { x:378, y:240, len:160, d:0.3, p:ch3P },
+    { x:400, y:248, len:180, d:0.6, p:ch3P },
+    { x:422, y:255, len:175, d:0.1, p:ch3P },
+    { x:445, y:265, len:155, d:0.5, p:ch3P },
+    { x:465, y:275, len:135, d:0.8, p:ch3P },
+    { x:235, y:248, len:120, d:0.4, p:ch2P },
+    { x:365, y:248, len:125, d:0.7, p:ch3P },
+  ];
+
+  return (
+    <>
+      <ellipse cx={300+shadowDx} cy="524" rx={85*shadowSX} ry={7-sunHeight*1.5}
+        fill={`rgba(20,12,4,${0.08+(1-sunHeight)*0.04})`}
+        style={{ transition:'cx 4s,rx 4s,ry 4s', filter:'blur(2.5px)' }}/>
+
+      <path d="M294,520 C265,504 235,514 200,528" stroke="#4a3020" strokeWidth="10" strokeLinecap="round" fill="none"
+        strokeDasharray="100" strokeDashoffset={100*(1-trP)} style={{ transition:tr }}/>
+      <path d="M306,522 C335,506 365,516 400,528" stroke="#4a3020" strokeWidth="10" strokeLinecap="round" fill="none"
+        strokeDasharray="100" strokeDashoffset={100*(1-trP)} style={{ transition:tr }}/>
+
+      <path d="M300,520 C296,460 288,400 286,340 C284,295 290,255 300,218"
+        stroke="#3a2010" strokeWidth="10" strokeLinecap="round" fill="none" opacity="0.2"
+        strokeDasharray="320" strokeDashoffset={320*(1-trP)} style={{ transition:tr }}/>
+      <path d="M300,520 C296,460 288,400 286,340 C284,295 290,255 300,218"
+        stroke="#5a3820" strokeWidth="24" strokeLinecap="round" fill="none"
+        strokeDasharray="320" strokeDashoffset={320*(1-trP)} style={{ transition:tr }}/>
+      <path d="M306,520 C303,458 296,396 294,336 C293,295 296,258 304,222"
+        stroke="#7a5838" strokeWidth="7" strokeLinecap="round" fill="none" opacity="0.4"
+        strokeDasharray="320" strokeDashoffset={320*(1-trP)} style={{ transition:tr }}/>
+
+      <path d="M294,280 C258,268 210,255 140,258"
+        stroke="#5a3820" strokeWidth="13" strokeLinecap="round" fill="none"
+        strokeDasharray="165" strokeDashoffset={165*(1-brP)} style={{ transition:tr }}/>
+      <path d="M306,280 C342,268 390,255 460,258"
+        stroke="#5a3820" strokeWidth="13" strokeLinecap="round" fill="none"
+        strokeDasharray="165" strokeDashoffset={165*(1-brP)} style={{ transition:tr }}/>
+      <path d="M296,255 C265,246 228,238 180,238"
+        stroke="#5a3820" strokeWidth="9" strokeLinecap="round" fill="none"
+        strokeDasharray="125" strokeDashoffset={125*(1-brP)} style={{ transition:tr }}/>
+      <path d="M304,255 C335,246 372,238 420,238"
+        stroke="#5a3820" strokeWidth="9" strokeLinecap="round" fill="none"
+        strokeDasharray="125" strokeDashoffset={125*(1-brP)} style={{ transition:tr }}/>
+      <path d="M298,235 C275,228 252,224 220,226"
+        stroke="#5a3820" strokeWidth="6" strokeLinecap="round" fill="none"
+        strokeDasharray="85" strokeDashoffset={85*(1-brP)} style={{ transition:tr }}/>
+      <path d="M302,235 C325,228 348,224 380,226"
+        stroke="#5a3820" strokeWidth="6" strokeLinecap="round" fill="none"
+        strokeDasharray="85" strokeDashoffset={85*(1-brP)} style={{ transition:tr }}/>
+
+      {CHAINS.map((ch, i) => {
+        const n = Math.floor(ch.len / 16);
+        return (
+          <g key={`wch${i}`}
+             style={{
+               transform:`scaleY(${ch.p})`, transformOrigin:`${ch.x}px ${ch.y}px`,
+               transition:'transform 2s cubic-bezier(0.34,1.2,0.64,1)',
+               animation: ch.p > 0.5 ? `wisteriaChainSway 5s ease-in-out ${ch.d}s infinite` : 'none',
+             }}>
+            {Array.from({ length: n }, (_, j) => {
+              const cy = ch.y + j * 16;
+              const r = Math.max(1.8, 5.5 - j * 0.35);
+              const op = Math.max(0.4, 0.95 - j * 0.05);
+              const col = j < n * 0.3 ? theme.leafLight : j < n * 0.65 ? theme.leafMid : theme.leafDark;
+              const ox = (j % 3 - 1) * 1.5;
+              return (
+                <React.Fragment key={j}>
+                  <circle cx={ch.x + ox} cy={cy} r={r} fill={col} opacity={op}/>
+                  {j < n - 1 && <circle cx={ch.x - ox * 0.6} cy={cy + 8} r={r * 0.6} fill={col} opacity={op * 0.65}/>}
+                </React.Fragment>
+              );
+            })}
+          </g>
+        );
+      })}
+
+      {rimLightOp > 0.1 && (
+        <path d="M300,520 C296,460 288,400 286,340 C284,295 290,255 300,218"
+          stroke={duskOp>0.5?'#d8a0e0':'#f0d8ff'} strokeWidth="4" strokeLinecap="round" fill="none"
+          opacity={rimLightOp*0.4} transform={`translate(${sunAngleNorm*10},0)`}
+          style={{ transition:'opacity 4s,transform 4s' }}
+          strokeDasharray="320" strokeDashoffset={320*(1-trP)}/>
+      )}
+      {nightOp > 0.18 && CHAINS.map((ch, i) => (
+        <rect key={`nwch${i}`} x={ch.x-8} y={ch.y} width={16} height={ch.len*ch.p}
+          fill="rgba(10,10,40,0.30)" opacity={nightOp*0.5} rx="4"/>
+      ))}
+      <g opacity={detP * 0.4} style={{ transition:'opacity 1.5s' }}>
+        {[480,420,360,310,270].map(y => (
+          <React.Fragment key={y}>
+            <path d={`M295,${y} Q293,${y+16} 296,${y+32}`} stroke="#2a1808" strokeWidth="0.9" fill="none" strokeLinecap="round"/>
+            <path d={`M304,${y+6} Q306,${y+20} 303,${y+34}`} stroke="#2a1808" strokeWidth="0.7" fill="none" strokeLinecap="round"/>
+          </React.Fragment>
+        ))}
+      </g>
+    </>
+  );
+}
+
+/* ─────────────────────── BAOBAB TREE ─────────────────────── */
+function BaobabTree({ progress, theme, sunAngleNorm, sunHeight, duskOp, rimLightOp, nightOp }) {
+  const trP  = c01(progress, 0.00, 0.20);
+  const brP  = c01(progress, 0.16, 0.40);
+  const lfP  = c01(progress, 0.32, 0.65);
+  const detP = c01(progress, 0.50, 0.80);
+  const tr   = 'transform 1.3s cubic-bezier(0.34,1.4,0.64,1)';
+  const shadowDx = -sunAngleNorm * 55;
+  const shadowSX = 1 + Math.abs(sunAngleNorm) * 0.5;
+
+  const trunkD = "M248,524 C243,480 232,420 228,370 C224,310 228,265 242,230 C252,206 270,190 290,182 C300,178 310,178 320,182 C340,190 358,206 368,230 C382,265 386,310 382,370 C378,420 367,480 362,524 Z";
+  const trunkHighD = "M268,524 C265,480 258,420 256,370 C254,315 258,270 268,242 C276,222 286,210 300,205 C314,210 324,222 332,242 C342,270 346,315 344,370 C342,420 335,480 332,524 Z";
+
+  const BRANCHES = [
+    { d:"M260,230 C230,210 190,195 140,180", w:11, da:135 },
+    { d:"M350,228 C380,208 420,194 470,178", w:11, da:140 },
+    { d:"M255,250 C225,238 185,230 130,228", w:8,  da:135 },
+    { d:"M355,248 C385,236 425,228 480,226", w:8,  da:140 },
+    { d:"M272,215 C258,198 240,178 218,158", w:9,  da:70 },
+    { d:"M338,213 C352,196 370,176 392,156", w:9,  da:70 },
+    { d:"M290,195 C280,172 268,148 258,120",  w:7,  da:85 },
+    { d:"M318,194 C328,170 340,146 350,118",  w:7,  da:85 },
+  ];
+
+  const CROWNS = [
+    { cx:140, cy:170, rx:35, ry:25, p:lfP },
+    { cx:470, cy:168, rx:35, ry:25, p:lfP },
+    { cx:130, cy:220, rx:30, ry:20, p:lfP },
+    { cx:480, cy:218, rx:30, ry:20, p:lfP },
+    { cx:218, cy:148, rx:30, ry:22, p:lfP },
+    { cx:392, cy:146, rx:30, ry:22, p:lfP },
+    { cx:258, cy:110, rx:28, ry:20, p:lfP },
+    { cx:350, cy:108, rx:28, ry:20, p:lfP },
+    { cx:300, cy:150, rx:24, ry:18, p:lfP },
+  ];
+
+  return (
+    <>
+      <ellipse cx={300+shadowDx} cy="526" rx={95*shadowSX} ry={9-sunHeight*1.8}
+        fill={`rgba(20,12,4,${0.10+(1-sunHeight)*0.05})`}
+        style={{ transition:'cx 4s,rx 4s,ry 4s', filter:'blur(3px)' }}/>
+
+      <path d="M262,524 C232,514 190,518 140,534" stroke="#6a5040" strokeWidth="15" strokeLinecap="round" fill="none"
+        strokeDasharray="135" strokeDashoffset={135*(1-trP)} style={{ transition:tr }}/>
+      <path d="M348,524 C378,514 420,518 470,534" stroke="#6a5040" strokeWidth="15" strokeLinecap="round" fill="none"
+        strokeDasharray="135" strokeDashoffset={135*(1-trP)} style={{ transition:tr }}/>
+      <path d="M275,528 C252,536 220,545 185,554" stroke="#6a5040" strokeWidth="9" strokeLinecap="round" fill="none"
+        strokeDasharray="95" strokeDashoffset={95*(1-trP)} style={{ transition:tr }}/>
+      <path d="M335,528 C358,536 390,545 425,554" stroke="#6a5040" strokeWidth="9" strokeLinecap="round" fill="none"
+        strokeDasharray="95" strokeDashoffset={95*(1-trP)} style={{ transition:tr }}/>
+
+      <path d={trunkD} fill="#6a5040"
+        style={{ transform:`scaleY(${trP})`, transformOrigin:'300px 524px', transition:'transform 2.2s cubic-bezier(0.34,1.1,0.64,1)' }}/>
+      <path d={trunkHighD} fill="#7a6855" opacity="0.6"
+        style={{ transform:`scaleY(${trP})`, transformOrigin:'300px 524px', transition:'transform 2.2s cubic-bezier(0.34,1.1,0.64,1)' }}/>
+      <path d="M285,524 C283,450 282,380 284,320 C286,275 292,245 300,225 C308,245 314,275 316,320 C318,380 317,450 315,524"
+        fill="#8a7868" opacity="0.3"
+        style={{ transform:`scaleY(${trP})`, transformOrigin:'300px 524px', transition:'transform 2.2s' }}/>
+
+      <g opacity={detP * 0.35} style={{ transition:'opacity 1.5s' }}>
+        {[490,450,410,370,330,300,275,255,240].map((y, i) => {
+          const w = y > 400 ? 48 : y > 300 ? 62 : y > 250 ? 55 : 40;
+          return (
+            <path key={y} d={`M${300-w},${y} Q${300},${y+2} ${300+w},${y}`}
+              stroke="#3a2818" strokeWidth="0.8" fill="none" opacity={0.5-i*0.03}/>
+          );
+        })}
+      </g>
+
+      {BRANCHES.map((b, i) => (
+        <path key={`bb${i}`} d={b.d} stroke="#5a4030" strokeWidth={b.w} strokeLinecap="round" fill="none"
+          strokeDasharray={b.da} strokeDashoffset={b.da*(1-brP)} style={{ transition:tr }}/>
+      ))}
+
+      {CROWNS.map((cr, i) => (
+        <g key={`bc${i}`} style={{
+          transform:`scale(${cr.p})`, transformOrigin:`${cr.cx}px ${cr.cy}px`,
+          transition:'transform 1.5s cubic-bezier(0.34,1.3,0.64,1)',
+          animation: cr.p > 0.5 ? `canopySway 5s ease-in-out ${i*0.4}s infinite` : 'none',
+        }}>
+          <ellipse cx={cr.cx} cy={cr.cy} rx={cr.rx+4} ry={cr.ry+3} fill={theme.leafDark} opacity="0.5"/>
+          <ellipse cx={cr.cx} cy={cr.cy} rx={cr.rx} ry={cr.ry} fill={theme.leafDark}/>
+          <ellipse cx={cr.cx} cy={cr.cy-3} rx={cr.rx*0.7} ry={cr.ry*0.65} fill={theme.leafMid} opacity="0.9"/>
+          <ellipse cx={cr.cx} cy={cr.cy-5} rx={cr.rx*0.4} ry={cr.ry*0.4} fill={theme.leafLight} opacity="0.7"/>
+          {rimLightOp > 0.08 && (
+            <ellipse cx={cr.cx+sunAngleNorm*cr.rx*0.4} cy={cr.cy-sunHeight*cr.ry*0.3}
+              rx={cr.rx*0.3} ry={cr.ry*0.2}
+              fill={duskOp>0.5?'#ffd080':'#e8ffa8'} opacity={rimLightOp*0.35}
+              style={{ filter:'blur(1.5px)', transition:'cx 4s,cy 4s' }}/>
+          )}
+          {nightOp > 0.18 && (
+            <ellipse cx={cr.cx} cy={cr.cy} rx={cr.rx} ry={cr.ry}
+              fill="rgba(8,16,44,0.45)" opacity={nightOp*0.7}/>
+          )}
+        </g>
+      ))}
+
+      {rimLightOp > 0.1 && (
+        <path d={trunkD} fill={duskOp>0.5?'#c89060':'#ffe8c0'} opacity={rimLightOp*0.15}
+          style={{ transform:`scaleY(${trP}) translateX(${sunAngleNorm*8}px)`, transformOrigin:'300px 524px', transition:'transform 4s,opacity 4s' }}/>
+      )}
+
+      <g opacity={detP * 0.5} style={{ transition:'opacity 1.5s' }}>
+        <ellipse cx="270" cy="500" rx="12" ry="4" fill="#5a7a3a" opacity="0.5"/>
+        <ellipse cx="335" cy="495" rx="10" ry="3.5" fill="#6a8a4a" opacity="0.4"/>
+      </g>
+    </>
+  );
+}
+
+/* ─────────────────────── CRYSTAL TREE ─────────────────────── */
+function CrystalTree({ progress, theme, sunAngleNorm, sunHeight, duskOp, rimLightOp, nightOp }) {
+  const trP  = c01(progress, 0.00, 0.16);
+  const brP  = c01(progress, 0.12, 0.35);
+  const crP  = c01(progress, 0.28, 0.55);
+  const cr2P = c01(progress, 0.40, 0.68);
+  const cr3P = c01(progress, 0.52, 0.80);
+  const detP = c01(progress, 0.60, 0.90);
+  const tr   = 'transform 1.3s cubic-bezier(0.34,1.4,0.64,1)';
+  const shadowDx = -sunAngleNorm * 40;
+  const shadowSX = 1 + Math.abs(sunAngleNorm) * 0.5;
+
+  const CRYSTALS = [
+    { pts:"0,-35 -14,0 0,8 14,0", cx:140, cy:195, s:1.1, p:crP, d:0 },
+    { pts:"0,-30 -12,0 0,6 12,0", cx:460, cy:190, s:1.0, p:crP, d:0.3 },
+    { pts:"0,-40 -16,0 0,10 16,0", cx:200, cy:140, s:1.2, p:crP, d:0.6 },
+    { pts:"0,-38 -14,0 0,8 14,0", cx:400, cy:138, s:1.15, p:crP, d:0.2 },
+    { pts:"0,-28 -10,0 0,5 10,0", cx:110, cy:230, s:0.85, p:cr2P, d:0.5 },
+    { pts:"0,-28 -10,0 0,5 10,0", cx:490, cy:225, s:0.85, p:cr2P, d:0.8 },
+    { pts:"0,-45 -18,0 0,12 18,0", cx:260, cy:85, s:1.3, p:cr2P, d:0.1 },
+    { pts:"0,-42 -17,0 0,10 17,0", cx:340, cy:82, s:1.25, p:cr2P, d:0.4 },
+    { pts:"0,-32 -12,0 0,7 12,0", cx:170, cy:120, s:1.0, p:cr2P, d:0.7 },
+    { pts:"0,-32 -12,0 0,7 12,0", cx:430, cy:118, s:1.0, p:cr2P, d:0.2 },
+    { pts:"0,-50 -20,0 0,14 20,0", cx:300, cy:55, s:1.4, p:cr3P, d:0 },
+    { pts:"0,-36 -14,0 0,8 14,0", cx:230, cy:110, s:1.05, p:cr3P, d:0.5 },
+    { pts:"0,-36 -14,0 0,8 14,0", cx:370, cy:108, s:1.05, p:cr3P, d:0.3 },
+    { pts:"0,-25 -9,0 0,4 9,0", cx:300, cy:140, s:0.9, p:cr3P, d:0.6 },
+  ];
+
+  return (
+    <>
+      <ellipse cx={300+shadowDx} cy="524" rx={75*shadowSX} ry={6-sunHeight*1.2}
+        fill={`rgba(10,20,40,${0.10+(1-sunHeight)*0.06})`}
+        style={{ transition:'cx 4s,rx 4s,ry 4s', filter:'blur(2px)' }}/>
+
+      <path d="M294,520 C274,510 254,518 234,528" stroke="#3a5a7a" strokeWidth="8" strokeLinecap="round" fill="none" opacity="0.6"
+        strokeDasharray="65" strokeDashoffset={65*(1-trP)} style={{ transition:tr }}/>
+      <path d="M306,520 C326,510 346,518 366,528" stroke="#3a5a7a" strokeWidth="8" strokeLinecap="round" fill="none" opacity="0.6"
+        strokeDasharray="65" strokeDashoffset={65*(1-trP)} style={{ transition:tr }}/>
+
+      <polygon points="300,520 280,520 286,380 290,260 294,180 298,120 300,80 302,120 306,180 310,260 314,380 320,520"
+        fill={theme.leafMid} opacity={0.55 * trP}
+        style={{ transition:'opacity 2s' }}/>
+      <polygon points="300,520 288,520 292,380 296,260 298,180 300,120 300,80 300,120 302,180 304,260 308,380 312,520"
+        fill={theme.leafLight} opacity={0.45 * trP}
+        style={{ transition:'opacity 2s' }}/>
+      <polygon points="300,520 294,520 296,380 298,260 299,180 300,120 300,80 300,120 301,180 302,260 304,380 306,520"
+        fill="rgba(200,240,255,0.3)" opacity={trP}
+        style={{ transition:'opacity 2s' }}/>
+
+      <path d="M296,340 C270,310 240,280 200,250 C175,230 145,215 115,205"
+        stroke={theme.leafMid} strokeWidth="6" strokeLinecap="round" fill="none" opacity="0.7"
+        strokeDasharray="260" strokeDashoffset={260*(1-brP)} style={{ transition:tr }}/>
+      <path d="M304,340 C330,310 360,280 400,250 C425,230 455,215 485,205"
+        stroke={theme.leafMid} strokeWidth="6" strokeLinecap="round" fill="none" opacity="0.7"
+        strokeDasharray="260" strokeDashoffset={260*(1-brP)} style={{ transition:tr }}/>
+      <path d="M298,260 C275,235 248,210 215,185 C195,170 172,158 148,150"
+        stroke={theme.leafMid} strokeWidth="5" strokeLinecap="round" fill="none" opacity="0.6"
+        strokeDasharray="220" strokeDashoffset={220*(1-brP)} style={{ transition:tr }}/>
+      <path d="M302,260 C325,235 352,210 385,185 C405,170 428,158 452,150"
+        stroke={theme.leafMid} strokeWidth="5" strokeLinecap="round" fill="none" opacity="0.6"
+        strokeDasharray="220" strokeDashoffset={220*(1-brP)} style={{ transition:tr }}/>
+      <path d="M298,200 C280,178 258,156 232,135"
+        stroke={theme.leafMid} strokeWidth="4" strokeLinecap="round" fill="none" opacity="0.5"
+        strokeDasharray="100" strokeDashoffset={100*(1-brP)} style={{ transition:tr }}/>
+      <path d="M302,200 C320,178 342,156 368,135"
+        stroke={theme.leafMid} strokeWidth="4" strokeLinecap="round" fill="none" opacity="0.5"
+        strokeDasharray="100" strokeDashoffset={100*(1-brP)} style={{ transition:tr }}/>
+
+      {CRYSTALS.map((cr, i) => (
+        <g key={`cr${i}`} style={{
+          transform:`translate(${cr.cx}px,${cr.cy}px) scale(${cr.s * cr.p})`,
+          transformOrigin:'0px 0px',
+          transition:'transform 1.8s cubic-bezier(0.34,1.4,0.64,1)',
+          animation: cr.p > 0.5 ? `crystalShimmer 4s ease-in-out ${cr.d}s infinite` : 'none',
+        }}>
+          <polygon points={cr.pts} fill={theme.leafDark} opacity="0.7"/>
+          <polygon points={cr.pts} fill={theme.leafMid} opacity="0.5" transform="scale(0.75)"/>
+          <polygon points={cr.pts} fill={theme.leafLight} opacity="0.4" transform="scale(0.45)"/>
+          <polygon points={cr.pts} fill="rgba(220,245,255,0.5)" opacity="0.3" transform="scale(0.2)"/>
+          {rimLightOp > 0.08 && (
+            <polygon points={cr.pts} fill={duskOp>0.5?'#ffd0a0':'#e0f8ff'}
+              opacity={rimLightOp*0.3} transform={`translate(${sunAngleNorm*4},0) scale(0.6)`}/>
+          )}
+          {nightOp > 0.18 && (
+            <>
+              <polygon points={cr.pts} fill="rgba(8,16,44,0.4)" opacity={nightOp*0.6}/>
+              <polygon points={cr.pts} fill="rgba(100,200,255,0.15)" opacity={nightOp*0.4} transform="scale(0.55)"/>
+            </>
+          )}
+        </g>
+      ))}
+
+      {detP > 0.3 && (
+        <g opacity={detP * 0.6} style={{ transition:'opacity 1.5s' }}>
+          {[
+            { cx:300, cy:75, r:4 }, { cx:140, cy:188, r:3 }, { cx:460, cy:183, r:3 },
+            { cx:200, cy:132, r:3.5 }, { cx:400, cy:130, r:3.5 }, { cx:260, cy:78, r:2.5 },
+            { cx:340, cy:76, r:2.5 }, { cx:300, cy:130, r:2 },
+          ].map((sp, i) => (
+            <circle key={`sp${i}`} cx={sp.cx} cy={sp.cy} r={sp.r}
+              fill="rgba(220,240,255,0.8)"
+              style={{ animation:`twinkle 2.5s ease-in-out ${i*0.4}s infinite` }}/>
+          ))}
+        </g>
+      )}
+
+      {rimLightOp > 0.1 && (
+        <polygon points="300,520 288,520 292,380 296,260 298,180 300,120 300,80 300,120 302,180 304,260 308,380 312,520"
+          fill={duskOp>0.5?'#ffc090':'#d0f0ff'} opacity={rimLightOp*0.25}
+          style={{ transform:`translateX(${sunAngleNorm*6}px)`, transition:'transform 4s,opacity 4s' }}/>
+      )}
+    </>
+  );
+}
+
 /* ─────────────────────── MAIN SCENE COMPONENT ─────────────────────── */
 export default function TreeScene({ progress, theme, treeShake, shimmer }) {
   const safeProgress = Math.max(0, Math.min(1, progress));
@@ -491,10 +839,13 @@ export default function TreeScene({ progress, theme, treeShake, shimmer }) {
   const grassDarken    = nightOp;
 
   const BLOBS = buildBlobs(theme);
-  const isPine    = theme.shape === 'pine';
-  const isBonsai  = theme.shape === 'bonsai';
-  const isBirch   = theme.shape === 'birch';
-  const isRedwood = theme.shape === 'redwood';
+  const isPine     = theme.shape === 'pine';
+  const isBonsai   = theme.shape === 'bonsai';
+  const isBirch    = theme.shape === 'birch';
+  const isRedwood  = theme.shape === 'redwood';
+  const isWisteria = theme.shape === 'wisteria';
+  const isBaobab   = theme.shape === 'baobab';
+  const isCrystal  = theme.shape === 'crystal';
 
   const treeSceneProps = {
     progress: safeProgress, theme,
@@ -594,6 +945,12 @@ export default function TreeScene({ progress, theme, treeShake, shimmer }) {
             <BonsaiTree {...treeSceneProps}/>
           ) : isRedwood ? (
             <RedwoodTree {...treeSceneProps}/>
+          ) : isWisteria ? (
+            <WisteriaTree {...treeSceneProps}/>
+          ) : isBaobab ? (
+            <BaobabTree {...treeSceneProps}/>
+          ) : isCrystal ? (
+            <CrystalTree {...treeSceneProps}/>
           ) : (
             <>
               {/* ── DECIDUOUS/BIRCH/OAK TREE ── */}
@@ -746,6 +1103,22 @@ export default function TreeScene({ progress, theme, treeShake, shimmer }) {
           0%, 100% { transform: translateX(0px) rotate(0deg); }
           33%      { transform: translateX(1.5px) rotate(0.3deg); }
           66%      { transform: translateX(-1px) rotate(-0.2deg); }
+        }
+        @keyframes wisteriaChainSway {
+          0%, 100% { transform: scaleY(1) translateX(0px) rotate(0deg); }
+          20%      { transform: scaleY(1) translateX(3px) rotate(0.8deg); }
+          50%      { transform: scaleY(1) translateX(-2px) rotate(-0.5deg); }
+          80%      { transform: scaleY(1) translateX(2.5px) rotate(0.4deg); }
+        }
+        @keyframes crystalShimmer {
+          0%, 100% { filter: brightness(1) saturate(1); }
+          25%      { filter: brightness(1.2) saturate(1.15); }
+          50%      { filter: brightness(0.95) saturate(1.05); }
+          75%      { filter: brightness(1.15) saturate(1.1); }
+        }
+        @keyframes twinkle {
+          0%, 100% { opacity: 0.3; }
+          50%      { opacity: 1; }
         }
       `}</style>
     </div>
