@@ -1,71 +1,116 @@
 import React from 'react';
 import { c01 } from './treeUtils.js';
 
-const TIERS = [
-  { apex:88,  base:172, hw:44,  pRange:[0.50,0.70] },
-  { apex:128, base:220, hw:60,  pRange:[0.43,0.62] },
-  { apex:174, base:276, hw:78,  pRange:[0.36,0.54] },
-  { apex:226, base:338, hw:98,  pRange:[0.29,0.47] },
-  { apex:284, base:404, hw:119, pRange:[0.22,0.41] },
-  { apex:350, base:472, hw:142, pRange:[0.15,0.34] },
-  { apex:420, base:524, hw:164, pRange:[0.08,0.28] },
-];
-
-function tierPath(apex, base, hw) {
-  const cx = 300;
-  const h  = base - apex;
-  const cy = apex + h * 0.62;
-  const dp = h * 0.07;
-  return `M${cx},${apex} `
-    + `C${cx-hw*0.18},${cy} ${cx-hw*0.74},${base} ${cx-hw},${base+dp} `
-    + `Q${cx},${base+dp*0.5} ${cx+hw},${base+dp} `
-    + `C${cx+hw*0.74},${base} ${cx+hw*0.18},${cy} ${cx},${apex} Z`;
+function bough(cx, apex, base, hw) {
+  const h = base - apex;
+  const sag = h * 0.08;
+  return (
+    `M${cx},${apex} ` +
+    `C${cx-hw*0.15},${apex+h*0.28} ${cx-hw*0.65},${apex+h*0.48} ${cx-hw},${base} ` +
+    `C${cx-hw*0.65},${base+sag*1.1} ${cx-hw*0.25},${base+sag*0.8} ${cx},${base+sag*0.3} ` +
+    `C${cx+hw*0.25},${base+sag*0.8} ${cx+hw*0.65},${base+sag*1.1} ${cx+hw},${base} ` +
+    `C${cx+hw*0.65},${apex+h*0.48} ${cx+hw*0.15},${apex+h*0.28} ${cx},${apex} Z`
+  );
 }
 
-const SWAY_DURATIONS = [3.8, 4.5, 4.1, 4.9, 4.3, 5.2, 4.7];
-const SHIVER_DURATIONS = [2.1, 1.8, 2.4, 1.9, 2.6, 2.0, 2.3];
+const TIERS = [
+  { apex: 82,  base: 158, hw: 36,  pRange: [0.52, 0.70] },
+  { apex: 116, base: 202, hw: 52,  pRange: [0.46, 0.64] },
+  { apex: 158, base: 254, hw: 70,  pRange: [0.40, 0.58] },
+  { apex: 208, base: 314, hw: 90,  pRange: [0.33, 0.51] },
+  { apex: 264, base: 380, hw: 112, pRange: [0.26, 0.44] },
+  { apex: 328, base: 450, hw: 134, pRange: [0.18, 0.36] },
+  { apex: 396, base: 524, hw: 158, pRange: [0.10, 0.28] },
+];
+
+const BRANCH_DATA = TIERS.map(({ apex, base, hw }, i) => {
+  const y = apex + (base - apex) * 0.35;
+  const count = Math.min(8, 3 + i);
+  return Array.from({ length: count }, (_, j) => {
+    const side = j % 2 === 0 ? -1 : 1;
+    const spread = (0.25 + Math.floor(j / 2) * 0.2) * hw;
+    const droop = 6 + Math.floor(j / 2) * 4;
+    return {
+      d: `M300,${y} Q${300 + side * spread * 0.55},${y + droop * 0.4} ${300 + side * spread},${y + droop}`,
+      len: Math.sqrt(spread * spread + droop * droop),
+    };
+  });
+});
+
+const PINECONES = [
+  { x: 208, y: 445, r: -5 }, { x: 392, y: 440, r: 6 },
+  { x: 185, y: 400, r: -8 }, { x: 415, y: 395, r: 4 },
+  { x: 230, y: 368, r: -3 }, { x: 370, y: 362, r: 7 },
+  { x: 255, y: 320, r: 5 },  { x: 345, y: 315, r: -4 },
+];
+
+const SWAY_DUR = [3.6, 4.2, 3.8, 4.6, 4.0, 4.8, 3.9];
+const SHIVER_DUR = [2.0, 1.7, 2.3, 1.9, 2.5, 2.1, 2.2];
 
 export default function PineTree({ progress, theme, sunAngleNorm, sunHeight, duskOp, rimLightOp, nightOp }) {
-  const trP  = c01(progress, 0.00, 0.13);
-  const detP = c01(progress, 0.60, 0.88);
+  const trP = c01(progress, 0.00, 0.14);
+  const detP = c01(progress, 0.55, 0.82);
+  const coneP = c01(progress, 0.62, 0.86);
 
   const tierProgress = TIERS.map(t => c01(progress, t.pRange[0], t.pRange[1]));
-  const trunkW = 8 + trP * 5;
+  const trunkW = 12 + trP * 8;
 
-  const shadowDx = -sunAngleNorm * 38;
+  const shadowDx = -sunAngleNorm * 42;
   const shadowSX = 1 + Math.abs(sunAngleNorm) * 0.5;
-
   const dashTr = 'stroke-dashoffset 2s cubic-bezier(0.34,1.2,0.64,1), stroke-width 1.8s ease-out';
 
   return (
     <>
-      <ellipse cx={300+shadowDx} cy="524" rx={65*shadowSX} ry={5.5-sunHeight*1.2}
-        fill={`rgba(20,12,4,${0.07+(1-sunHeight)*0.04})`}
-        style={{ transition:'cx 4s,rx 4s,ry 4s', filter:'blur(2px)' }}/>
+      <ellipse cx={300 + shadowDx} cy="526" rx={72 * shadowSX} ry={6 - sunHeight * 1.2}
+        fill={`rgba(20,12,4,${0.08 + (1 - sunHeight) * 0.05})`}
+        style={{ transition: 'cx 4s,rx 4s,ry 4s', filter: 'blur(2px)' }} />
 
-      <path d="M294,520 C272,508 250,518 230,528" stroke="#3a1808" strokeWidth="9" strokeLinecap="round" fill="none"
-        strokeDasharray="72" strokeDashoffset={72*(1-trP)} style={{ transition:dashTr }}/>
-      <path d="M306,522 C330,510 354,520 372,528" stroke="#3a1808" strokeWidth="9" strokeLinecap="round" fill="none"
-        strokeDasharray="72" strokeDashoffset={72*(1-trP)} style={{ transition:dashTr }}/>
+      <path d="M286,522 C256,508 222,516 188,530" stroke="#3a1808" strokeWidth="12" strokeLinecap="round" fill="none"
+        strokeDasharray="105" strokeDashoffset={105 * (1 - trP)} style={{ transition: dashTr }} />
+      <path d="M314,522 C344,508 378,516 412,530" stroke="#3a1808" strokeWidth="12" strokeLinecap="round" fill="none"
+        strokeDasharray="105" strokeDashoffset={105 * (1 - trP)} style={{ transition: dashTr }} />
+      <path d="M292,526 C272,534 248,542 228,548" stroke="#3a1808" strokeWidth="7" strokeLinecap="round" fill="none"
+        strokeDasharray="70" strokeDashoffset={70 * (1 - trP)} style={{ transition: dashTr }} />
+      <path d="M308,526 C328,534 352,542 372,548" stroke="#3a1808" strokeWidth="7" strokeLinecap="round" fill="none"
+        strokeDasharray="70" strokeDashoffset={70 * (1 - trP)} style={{ transition: dashTr }} />
+      <path d="M296,528 C284,536 268,544 252,550" stroke="#3a1808" strokeWidth="5" strokeLinecap="round" fill="none"
+        strokeDasharray="50" strokeDashoffset={50 * (1 - trP)} style={{ transition: dashTr }} />
+      <path d="M304,528 C316,536 332,544 348,550" stroke="#3a1808" strokeWidth="5" strokeLinecap="round" fill="none"
+        strokeDasharray="50" strokeDashoffset={50 * (1 - trP)} style={{ transition: dashTr }} />
 
-      <path d="M296,524 C296,460 297,350 298,200 C298,150 299,110 299,88"
-        stroke="#1a0a04" strokeWidth={trunkW+3} strokeLinecap="round" fill="none" opacity="0.15"
-        strokeDasharray="438" strokeDashoffset={438*(1-trP)} style={{ transition:dashTr }}/>
-      <path d="M296,524 C296,460 297,350 298,200 C298,150 299,110 299,88"
+      <path d="M296,524 C296,450 298,340 298,200 C298,145 299,105 299,78"
+        stroke="#1a0a04" strokeWidth={trunkW + 5} strokeLinecap="round" fill="none" opacity="0.15"
+        strokeDasharray="450" strokeDashoffset={450 * (1 - trP)} style={{ transition: dashTr }} />
+      <path d="M298,524 C298,450 299,340 299,200 C299,145 300,105 300,78"
         stroke="#3a1808" strokeWidth={trunkW} strokeLinecap="round" fill="none"
-        strokeDasharray="438" strokeDashoffset={438*(1-trP)} style={{ transition:dashTr }}/>
-      <path d="M299,524 C299,460 300,350 301,200 C301,150 302,110 302,88"
-        stroke="#6a4020" strokeWidth={Math.max(2, trunkW*0.3)} strokeLinecap="round" fill="none" opacity="0.55"
-        strokeDasharray="438" strokeDashoffset={438*(1-trP)} style={{ transition:dashTr }}/>
+        strokeDasharray="450" strokeDashoffset={450 * (1 - trP)} style={{ transition: dashTr }} />
+      <path d="M300,524 C300,450 301,340 300,200 C300,145 300,105 300,78"
+        stroke="#5a3018" strokeWidth={Math.max(3, trunkW * 0.38)} strokeLinecap="round" fill="none" opacity="0.5"
+        strokeDasharray="450" strokeDashoffset={450 * (1 - trP)} style={{ transition: dashTr }} />
+      <path d="M302,524 C302,450 302,340 301,200 C301,145 301,105 301,78"
+        stroke="#7a4828" strokeWidth={Math.max(1.5, trunkW * 0.15)} strokeLinecap="round" fill="none" opacity="0.3"
+        strokeDasharray="450" strokeDashoffset={450 * (1 - trP)} style={{ transition: dashTr }} />
+
+      <g opacity={detP * 0.45} style={{ transition: 'opacity 1.5s' }}>
+        {[120, 170, 225, 285, 350, 420, 475].map((y, i) => (
+          <React.Fragment key={y}>
+            <path d={`M${297 + (i % 2)},${y} Q${296},${y + 14} ${298},${y + 28}`}
+              stroke="#1a0804" strokeWidth="0.9" fill="none" strokeLinecap="round" />
+            <path d={`M${302 - (i % 2)},${y + 6} Q${303},${y + 18} ${301},${y + 32}`}
+              stroke="#1a0804" strokeWidth="0.7" fill="none" strokeLinecap="round" />
+            <path d={`M${299},${y + 3} Q${298},${y + 11} ${300},${y + 20}`}
+              stroke="#1a0804" strokeWidth="0.5" fill="none" strokeLinecap="round" />
+          </React.Fragment>
+        ))}
+      </g>
 
       {TIERS.map(({ apex, base, hw }, i) => {
         const p = tierProgress[i];
-        const oy = `300px ${apex + (base - apex) * 0.25}px`;
-        const swayAnim = `canopySway ${SWAY_DURATIONS[i]}s ease-in-out ${i * 0.35}s infinite`;
-        const shiverAnim = `pineTierShiver ${SHIVER_DURATIONS[i]}s ease-in-out ${i * 0.22}s infinite`;
+        const oy = `300px ${apex + (base - apex) * 0.3}px`;
+
         return (
-          <g key={i} style={{
-            animation: p > 0.6 ? swayAnim : 'none',
+          <g key={`tier${i}`} style={{
+            animation: p > 0.6 ? `canopySway ${SWAY_DUR[i]}s ease-in-out ${i * 0.35}s infinite` : 'none',
             transformOrigin: oy,
           }}>
             <g style={{
@@ -74,54 +119,125 @@ export default function PineTree({ progress, theme, sunAngleNorm, sunHeight, dus
               transition: 'transform 1.6s cubic-bezier(0.22,1.6,0.36,1), opacity 0.8s ease-out',
               opacity: Math.min(1, p * 3),
             }}>
-              <path d={tierPath(apex + 6, base + 5, hw * 1.06)} fill={theme.leafDark} opacity={0.6}/>
-              <path d={tierPath(apex, base, hw)} fill={theme.leafDark}/>
-              <path d={tierPath(apex + 4, base - 4, hw * 0.70)} fill={theme.leafMid} opacity={0.94}/>
-              <path d={tierPath(apex + 9, base - 14, hw * 0.44)} fill={theme.leafLight} opacity={0.76}/>
-              {p > 0.7 && (
-                <g style={{ animation: shiverAnim, transformOrigin: `300px ${apex + 4}px` }}>
-                  <path d={tierPath(apex + 2, base - 2, hw * 0.52)} fill={theme.leafMid} opacity={0.18}/>
+              <path d={bough(300, apex + 6, base + 5, hw * 1.06)} fill={theme.leafDark} opacity="0.4" />
+
+              <path d={bough(300 - hw * 0.38, apex + (base - apex) * 0.22, base + 3, hw * 0.48)}
+                fill={theme.leafDark} opacity="0.55" />
+              <path d={bough(300 + hw * 0.38, apex + (base - apex) * 0.20, base + 2, hw * 0.45)}
+                fill={theme.leafDark} opacity="0.55" />
+              {i > 2 && (
+                <>
+                  <path d={bough(300 - hw * 0.62, apex + (base - apex) * 0.35, base + 1, hw * 0.3)}
+                    fill={theme.leafDark} opacity="0.4" />
+                  <path d={bough(300 + hw * 0.62, apex + (base - apex) * 0.33, base, hw * 0.28)}
+                    fill={theme.leafDark} opacity="0.4" />
+                </>
+              )}
+
+              <path d={bough(300, apex, base, hw)} fill={theme.leafDark} />
+
+              <path d={bough(300, apex + 4, base - 6, hw * 0.72)} fill={theme.leafMid} opacity="0.92" />
+
+              {p > 0.35 && BRANCH_DATA[i].map((br, j) => (
+                <path key={`br${j}`} d={br.d}
+                  stroke={theme.leafDark} strokeWidth="1.5" strokeLinecap="round" fill="none"
+                  opacity={0.3 * p}
+                  strokeDasharray={br.len} strokeDashoffset={br.len * (1 - p)}
+                  style={{ transition: 'stroke-dashoffset 2s ease-out' }} />
+              ))}
+
+              <path d={bough(300, apex + 8, base - 16, hw * 0.44)} fill={theme.leafLight} opacity="0.72" />
+
+              {p > 0.65 && (
+                <g opacity={0.2 * p}>
+                  {Array.from({ length: Math.min(5, 1 + Math.floor(i / 1.5)) }, (_, ni) => {
+                    const nx = 300 + (ni - Math.min(5, 1 + Math.floor(i / 1.5)) / 2) * (hw * 0.3);
+                    const ny = apex + (base - apex) * (0.35 + (ni % 3) * 0.12);
+                    return (
+                      <g key={`nd${ni}`}>
+                        {[-25, -10, 5, 20].map((a, ai) => {
+                          const rad = a * Math.PI / 180;
+                          return (
+                            <line key={ai} x1={nx} y1={ny}
+                              x2={nx + Math.cos(rad) * 5} y2={ny + Math.sin(rad) * 5}
+                              stroke={theme.leafLight} strokeWidth="0.7" strokeLinecap="round" />
+                          );
+                        })}
+                      </g>
+                    );
+                  })}
                 </g>
               )}
+
+              {p > 0.7 && (
+                <g style={{
+                  animation: `pineTierShiver ${SHIVER_DUR[i]}s ease-in-out ${i * 0.22}s infinite`,
+                  transformOrigin: `300px ${apex + 4}px`,
+                }}>
+                  <path d={bough(300, apex + 2, base - 3, hw * 0.55)} fill={theme.leafMid} opacity="0.16" />
+                </g>
+              )}
+
               {rimLightOp > 0.08 && (
-                <path d={tierPath(apex, base, hw * 0.30)}
+                <path d={bough(300, apex, base, hw * 0.28)}
                   fill={duskOp > 0.5 ? '#ffd080' : '#e8ffa8'}
-                  opacity={rimLightOp * 0.42}
-                  style={{ transform: `translateX(${sunAngleNorm * hw * 0.07}px)`, transition: 'transform 4s' }}/>
+                  opacity={rimLightOp * 0.4}
+                  style={{ transform: `translateX(${sunAngleNorm * hw * 0.07}px)`, transition: 'transform 4s' }} />
               )}
+
               {nightOp > 0.18 && (
-                <path d={tierPath(apex, base, hw)} fill="rgba(8,16,44,0.52)" opacity={nightOp * 0.8}/>
+                <path d={bough(300, apex, base, hw)} fill="rgba(8,16,44,0.50)" opacity={nightOp * 0.8} />
               )}
-              {progress > 0.88 && i < 2 && (
-                <path d={tierPath(apex, apex + (base - apex) * 0.26, hw * 0.34)}
-                  fill="rgba(232,246,255,0.90)" opacity={0.9 * p}/>
+
+              {progress > 0.88 && i < 3 && (
+                <path d={bough(300, apex, apex + (base - apex) * 0.22, hw * 0.36)}
+                  fill="rgba(232,246,255,0.88)" opacity={0.9 * p} />
               )}
             </g>
           </g>
         );
       })}
 
-      <g opacity={detP * 0.4} style={{ transition: 'opacity 1.5s' }}>
-        {[130, 190, 260, 340, 420].map(y => (
-          <React.Fragment key={y}>
-            <path d={`M296,${y} Q295,${y + 15} 297,${y + 30}`} stroke="#1a0804" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
-            <path d={`M302,${y + 8} Q303,${y + 22} 301,${y + 38}`} stroke="#1a0804" strokeWidth="0.6" fill="none" strokeLinecap="round"/>
-          </React.Fragment>
-        ))}
-      </g>
+      {coneP > 0 && (
+        <g opacity={Math.min(1, coneP * 2.5)} style={{ transition: 'opacity 1.5s' }}>
+          {PINECONES.map((pc, i) => (
+            <g key={`cone${i}`} transform={`rotate(${pc.r} ${pc.x} ${pc.y})`}
+              style={{ animation: coneP > 0.5 ? `canopySway ${5 + i * 0.3}s ease-in-out ${i * 0.4}s infinite` : 'none',
+                       transformOrigin: `${pc.x}px ${pc.y - 8}px` }}>
+              <ellipse cx={pc.x} cy={pc.y} rx="5" ry="8" fill="#5a3818" />
+              <ellipse cx={pc.x} cy={pc.y - 1} rx="3.5" ry="5.5" fill="#7a5028" opacity="0.7" />
+              <ellipse cx={pc.x} cy={pc.y - 2} rx="1.8" ry="3.2" fill="#9a6838" opacity="0.5" />
+              {[-4, -1, 2, 5].map((dy, si) => (
+                <path key={si} d={`M${pc.x - 3.5},${pc.y + dy} Q${pc.x},${pc.y + dy - 1.8} ${pc.x + 3.5},${pc.y + dy}`}
+                  stroke="#4a2808" strokeWidth="0.5" fill="none" opacity="0.45" />
+              ))}
+            </g>
+          ))}
+        </g>
+      )}
 
       {detP > 0.6 && (
         <g opacity={detP * 0.85} style={{ transition: 'opacity 1s' }}>
-          <g style={{ animation: 'crownStarSpin 18s linear infinite', transformOrigin: '299px 84px' }}>
-            {[0, 60, 120, 180, 240, 300].map(deg => {
+          <g style={{ animation: 'crownStarSpin 18s linear infinite', transformOrigin: '300px 74px' }}>
+            {[0, 45, 90, 135, 180, 225, 270, 315].map(deg => {
               const r = deg * Math.PI / 180;
-              return <line key={deg} x1="299" y1="84" x2={299 + Math.cos(r) * 9} y2={84 + Math.sin(r) * 9}
-                stroke={theme.leafLight} strokeWidth="1.5" strokeLinecap="round" opacity="0.8"/>;
+              return <line key={deg} x1="300" y1="74" x2={300 + Math.cos(r) * 11} y2={74 + Math.sin(r) * 11}
+                stroke={theme.leafLight} strokeWidth="1.8" strokeLinecap="round" opacity="0.75" />;
             })}
           </g>
-          <circle cx="299" cy="84" r="3.5" fill={theme.leafLight} opacity="0.95"
-            style={{ animation: 'twinkle 2.8s ease-in-out infinite' }}/>
+          <circle cx="300" cy="74" r="4.5" fill={theme.leafLight} opacity="0.95"
+            style={{ animation: 'twinkle 2.8s ease-in-out infinite' }} />
+          <circle cx="300" cy="74" r="7" fill={theme.leafLight} opacity="0.15"
+            style={{ animation: 'twinkle 2.8s ease-in-out 0.5s infinite', filter: 'blur(2px)' }} />
         </g>
+      )}
+
+      {rimLightOp > 0.1 && (
+        <path d="M298,524 C298,450 299,340 299,200 C299,145 300,105 300,78"
+          stroke={duskOp > 0.5 ? '#c89060' : '#ffe8c0'} strokeWidth="3.5" strokeLinecap="round" fill="none"
+          opacity={rimLightOp * 0.3} transform={`translate(${sunAngleNorm * 6},0)`}
+          style={{ transition: 'transform 4s,opacity 4s' }}
+          strokeDasharray="450" strokeDashoffset={450 * (1 - trP)} />
       )}
     </>
   );
