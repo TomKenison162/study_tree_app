@@ -1,0 +1,12 @@
+export { default as PineTree }     from './PineTree.jsx';
+export { default as RedwoodTree }  from './RedwoodTree.jsx';
+export { default as BonsaiTree }   from './BonsaiTree.jsx';
+export { default as BirchTrunk }   from './BirchTrunk.jsx';
+export { default as WisteriaTree } from './WisteriaTree.jsx';
+export { default as BaobabTree }   from './BaobabTree.jsx';
+export { default as CrystalTree }  from './CrystalTree.jsx';
+export { default as BambooTree }   from './BambooTree.jsx';
+export { default as PalmTree }     from './PalmTree.jsx';
+export { default as CypressTree }  from './CypressTree.jsx';
+export { default as GrassScene }   from './GrassScene.jsx';
+export { default as KEYFRAMES }    from './keyframes.js';

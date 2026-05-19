@@ -102,6 +102,27 @@ export const TREE_THEMES = {
     glow: 'rgba(100,180,240,', petal: '#b0e0ff',
     canopyScale: 1.0, canopyDropY: 0,
   },
+  bamboo: {
+    name: 'Bamboo', shape: 'bamboo',
+    leafDark: '#2a5a1a', leafMid: '#4a8a28', leafLight: '#8ac848',
+    accent: '#6aaa38', accentDeep: '#1a4a10',
+    glow: 'rgba(130,200,70,', petal: '#a8d870',
+    canopyScale: 1.0, canopyDropY: 0,
+  },
+  palm: {
+    name: 'Palm', shape: 'palm',
+    leafDark: '#1a4a20', leafMid: '#3a8a38', leafLight: '#68c060',
+    accent: '#a07828', accentDeep: '#6a4a18',
+    glow: 'rgba(140,210,100,', petal: '#90d878',
+    canopyScale: 1.0, canopyDropY: 0,
+  },
+  cypress: {
+    name: 'Cypress', shape: 'cypress',
+    leafDark: '#0e2e18', leafMid: '#1a5028', leafLight: '#2a7838',
+    accent: '#205030', accentDeep: '#0a2010',
+    glow: 'rgba(60,140,80,', petal: '#70a880',
+    canopyScale: 1.0, canopyDropY: 0,
+  },
 };
 
 /* ════════════════════════════════════════════════════════════
@@ -355,6 +376,50 @@ export function TinyTreeIcon({ themeKey, size = 32, opacity = 1 }) {
         <polygon points="4,10 7,7 6,12" fill={theme.leafLight} opacity="0.5"/>
         <polygon points="18,9 15,6 16,11" fill={theme.leafLight} opacity="0.5"/>
         <circle cx="11" cy="2" r="1.5" fill="white" opacity="0.7"/>
+      </svg>
+    );
+  }
+  if (theme.shape === 'bamboo') {
+    return (
+      <svg width={size} height={h} viewBox="0 0 22 26" style={{ opacity }}>
+        <rect x="5" y="4" width="3.5" height="22" rx="1.5" fill={theme.leafDark}/>
+        <rect x="5.5" y="4" width="1.5" height="22" rx="0.7" fill={theme.leafMid} opacity="0.6"/>
+        {[8,12,16,20].map(y => <line key={y} x1="5" y1={y} x2="8.5" y2={y} stroke={theme.leafLight} strokeWidth="0.8" opacity="0.7"/>)}
+        <rect x="11" y="7" width="3" height="19" rx="1.2" fill={theme.leafMid}/>
+        <rect x="11.5" y="7" width="1.2" height="19" rx="0.5" fill={theme.leafLight} opacity="0.5"/>
+        {[11,15,19].map(y => <line key={y} x1="11" y1={y} x2="14" y2={y} stroke={theme.leafLight} strokeWidth="0.8" opacity="0.7"/>)}
+        <path d="M8.5,8 C12,6 16,5 19,6" stroke={theme.leafLight} strokeWidth="1.2" fill="none" strokeLinecap="round" opacity="0.8"/>
+        <path d="M8.5,12 C10,10 14,9 17,10" stroke={theme.leafLight} strokeWidth="1" fill="none" strokeLinecap="round" opacity="0.7"/>
+        <path d="M14,11 C16,9 19,8 21,9" stroke={theme.leafMid} strokeWidth="1" fill="none" strokeLinecap="round" opacity="0.7"/>
+      </svg>
+    );
+  }
+  if (theme.shape === 'palm') {
+    return (
+      <svg width={size} height={h} viewBox="0 0 22 26" style={{ opacity }}>
+        <path d="M11,25 C11.5,20 12,16 13,12 C14,9 14,7 13,5" stroke="#8a6030" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+        <path d="M13,7 C9,4 5,3 2,4" stroke={theme.leafDark} strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+        <path d="M13,6 C15,3 18,1 21,1" stroke={theme.leafDark} strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+        <path d="M13,8 C10,6 6,6 3,7" stroke={theme.leafMid} strokeWidth="1.3" fill="none" strokeLinecap="round"/>
+        <path d="M13,8 C16,6 19,5.5 21,6" stroke={theme.leafMid} strokeWidth="1.3" fill="none" strokeLinecap="round"/>
+        <path d="M13,9 C11,8 8,8 6,9" stroke={theme.leafLight} strokeWidth="1.1" fill="none" strokeLinecap="round" opacity="0.8"/>
+        <circle cx="2" cy="4" r="2.2" fill={theme.leafLight} opacity="0.7"/>
+        <circle cx="21" cy="1" r="2" fill={theme.leafLight} opacity="0.7"/>
+        <circle cx="3" cy="7" r="1.8" fill={theme.leafMid} opacity="0.6"/>
+        <circle cx="21" cy="6" r="1.8" fill={theme.leafMid} opacity="0.6"/>
+      </svg>
+    );
+  }
+  if (theme.shape === 'cypress') {
+    return (
+      <svg width={size} height={h} viewBox="0 0 22 26" style={{ opacity }}>
+        <rect x="9.5" y="18" width="3" height="8" fill="#5a3a1a" rx="0.5"/>
+        <ellipse cx="11" cy="16" rx="4" ry="4.5" fill={theme.leafDark}/>
+        <ellipse cx="11" cy="12" rx="3.5" ry="4" fill={theme.leafMid}/>
+        <ellipse cx="11" cy="9" rx="3" ry="3.5" fill={theme.leafMid}/>
+        <ellipse cx="11" cy="6.5" rx="2.5" ry="3" fill={theme.leafLight}/>
+        <ellipse cx="11" cy="4" rx="2" ry="2.5" fill={theme.leafLight} opacity="0.9"/>
+        <polygon points="11,1 10,3.5 12,3.5" fill={theme.leafLight} opacity="0.8"/>
       </svg>
     );
   }
