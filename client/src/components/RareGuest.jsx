@@ -49,6 +49,38 @@ export const GUEST_CONFIG = {
     leaveAnim: 'catVanish',
     idleAnim: 'catShimmer',
   },
+  hedgehog: {
+    name: 'Hedgehog', rarity: 'Common', rarityMark: '●',
+    color: '#8a6030', glowColor: 'rgba(150,110,50,0.7)',
+    pos: { bottom: '4%', right: '10%' },
+    w: 54, h: 58,
+    leaveAnim: 'hedgehogScurry',
+    idleAnim: 'hedgehogSniff',
+  },
+  squirrel: {
+    name: 'Squirrel', rarity: 'Common', rarityMark: '●',
+    color: '#a05820', glowColor: 'rgba(180,100,40,0.7)',
+    pos: { bottom: '28%', right: '8%' },
+    w: 52, h: 72,
+    leaveAnim: 'squirrelDash',
+    idleAnim: 'squirrelTwitch',
+  },
+  frog: {
+    name: 'Frog', rarity: 'Rare', rarityMark: '■',
+    color: '#3a8828', glowColor: 'rgba(50,160,40,0.7)',
+    pos: { bottom: '3%', right: '28%' },
+    w: 64, h: 54,
+    leaveAnim: 'frogJump',
+    idleAnim: 'frogBob',
+  },
+  raccoon: {
+    name: 'Raccoon', rarity: 'Epic', rarityMark: '◆',
+    color: '#7060a0', glowColor: 'rgba(110,80,170,0.7)',
+    pos: { bottom: '4%', left: '42%' },
+    w: 72, h: 88,
+    leaveAnim: 'raccoonSlink',
+    idleAnim: 'raccoonIdle',
+  },
 };
 
 /* ── RABBIT ── */
@@ -496,6 +528,244 @@ function CatSVG({ alert, clicked }) {
   );
 }
 
+/* ── HEDGEHOG ── */
+function HedgehogSVG({ alert, clicked }) {
+  return (
+    <svg viewBox="0 0 54 58" width="54" height="58" style={{ display:'block' }}>
+      {/* Spines */}
+      <g stroke="#4a2808" strokeLinecap="round" fill="none">
+        <path d="M28,16 C30,7 34,2 36,5" strokeWidth="2"/>
+        <path d="M33,15 C36,7 40,4 40,8" strokeWidth="2"/>
+        <path d="M37,18 C41,12 45,11 44,16" strokeWidth="2"/>
+        <path d="M39,23 C44,19 47,20 46,25" strokeWidth="2"/>
+        <path d="M38,29 C43,27 46,29 44,33" strokeWidth="2"/>
+        <path d="M35,34 C40,33 43,36 40,39" strokeWidth="1.8"/>
+        <path d="M23,14 C24,5 27,1 29,4" strokeWidth="1.8"/>
+      </g>
+      {/* Spine body */}
+      <ellipse cx="34" cy="28" rx="16" ry="14" fill="#7a5030" opacity="0.85"/>
+      {/* Main body */}
+      <ellipse cx="24" cy="40" rx="20" ry="14" fill="#c8a06a"/>
+      <ellipse cx="20" cy="42" rx="14" ry="9" fill="#d8b07a" opacity="0.5"/>
+      {/* Face */}
+      <ellipse cx="12" cy="38" rx="11" ry="10" fill="#d4aa78"/>
+      {/* Snout */}
+      <ellipse cx="4" cy="40" rx="5" ry="3.5" fill="#dcc090"/>
+      {/* Nose */}
+      <circle cx="2" cy="39" r="2.5" fill="#1a0808"/>
+      <circle cx="1.2" cy="38.2" r="0.7" fill="white" opacity="0.5"/>
+      {/* Eye */}
+      <circle cx="10" cy="33" r={alert ? 4.2 : 3.5} fill="#1a0808"/>
+      <circle cx="11.2" cy={alert?'30.5':'31'} r={alert?1.8:1.4} fill="white" opacity="0.85"/>
+      <circle cx="9.2" cy="33.5" r="0.6" fill="white" opacity="0.4"/>
+      {/* Blush */}
+      <circle cx="8" cy="38" r="3.5" fill="#ffb0b0" opacity="0.4"/>
+      {/* Ear */}
+      <ellipse cx="16" cy="28" rx="3.5" ry={alert?5:4.5} fill="#c09060"/>
+      <ellipse cx="16" cy="28" rx="2" ry={alert?3.5:3} fill="#e8b090" opacity="0.65"/>
+      {/* Stubby legs */}
+      <ellipse cx="12" cy="52" rx="4.5" ry="3" fill="#a07848"/>
+      <ellipse cx="24" cy="53" rx="4.5" ry="3" fill="#a07848"/>
+      <ellipse cx="36" cy="51" rx="4" ry="3" fill="#8a6030"/>
+    </svg>
+  );
+}
+
+/* ── SQUIRREL ── */
+function SquirrelSVG({ alert, clicked }) {
+  return (
+    <svg viewBox="0 0 52 72" width="52" height="72" style={{ display:'block' }}>
+      {/* Big fluffy tail arching up behind */}
+      <path d="M34,62 C48,50 54,34 48,18 C44,8 36,10 34,18 C32,28 34,46 34,62" fill="#c87828"/>
+      <path d="M36,60 C48,50 52,36 47,22 C46,16 42,16 40,22 C38,32 38,48 36,60" fill="#e89840" opacity="0.55"/>
+      <path d="M48,18 C52,12 54,14 52,20 C50,24 46,22 44,18" fill="#f0d090"/>
+      <path d="M36,52 Q42,46 40,42" stroke="#b06820" strokeWidth="1.2" fill="none" opacity="0.4"/>
+      <path d="M40,38 Q44,32 42,28" stroke="#b06820" strokeWidth="1.2" fill="none" opacity="0.4"/>
+      {/* Body */}
+      <ellipse cx="22" cy="52" rx="14" ry="16" fill="#c87828"/>
+      <ellipse cx="22" cy="56" rx="9" ry="11" fill="#d89040" opacity="0.45"/>
+      {/* Belly */}
+      <ellipse cx="22" cy="58" rx="7" ry="9" fill="#f0dca0" opacity="0.6"/>
+      {/* Head */}
+      <ellipse cx="22" cy="24" rx="13" ry="14" fill="#c87828"/>
+      {/* Ears */}
+      <ellipse cx="13" cy="14" rx="4" ry="6" fill="#c87828" transform="rotate(-15 13 14)"/>
+      <ellipse cx="13" cy="14" rx="2.5" ry="3.8" fill="#e8b080" opacity="0.7" transform="rotate(-15 13 14)"/>
+      <ellipse cx="31" cy="13" rx="4" ry="6" fill="#c87828" transform="rotate(15 31 13)"/>
+      <ellipse cx="31" cy="13" rx="2.5" ry="3.8" fill="#e8b080" opacity="0.7" transform="rotate(15 31 13)"/>
+      {alert && <>
+        <ellipse cx="13" cy="12" rx="4" ry="7" fill="#c87828" transform="rotate(-20 13 12)"/>
+        <ellipse cx="31" cy="11" rx="4" ry="7" fill="#c87828" transform="rotate(20 31 11)"/>
+      </>}
+      {/* Chubby cheek pouches */}
+      <ellipse cx="12" cy="27" rx="5.5" ry="4.5" fill="#d89040" opacity="0.5"/>
+      <ellipse cx="32" cy="27" rx="5.5" ry="4.5" fill="#d89040" opacity="0.5"/>
+      {/* Eyes */}
+      <circle cx="17" cy="22" r={alert ? 5 : 4} fill="#1a0808"/>
+      <circle cx="18.2" cy={alert?'19.5':'20'} r={alert?2.2:1.8} fill="white" opacity="0.85"/>
+      <circle cx="16" cy="22.5" r="0.7" fill="white" opacity="0.4"/>
+      <circle cx="27" cy="22" r={alert ? 5 : 4} fill="#1a0808"/>
+      <circle cx="28.2" cy={alert?'19.5':'20'} r={alert?2.2:1.8} fill="white" opacity="0.85"/>
+      <circle cx="26" cy="22.5" r="0.7" fill="white" opacity="0.4"/>
+      {/* Blush */}
+      <circle cx="11" cy="28" r="4" fill="#ffb0b0" opacity="0.4"/>
+      <circle cx="33" cy="28" r="4" fill="#ffb0b0" opacity="0.4"/>
+      {/* Nose */}
+      <ellipse cx="22" cy="30" rx="2.8" ry="2.2" fill="#1a0808"/>
+      <ellipse cx="21.2" cy="29.5" rx="0.9" ry="0.5" fill="white" opacity="0.3"/>
+      {/* Smile */}
+      <path d="M19,33 Q22,36 25,33" stroke="#8a5020" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+      {/* Acorn */}
+      <ellipse cx="22" cy="68" rx="5" ry="3.5" fill="#8a5820"/>
+      <rect x="19" y="62" width="6" height="7" rx="3" fill="#c08030"/>
+      <ellipse cx="22" cy="62" rx="6.5" ry="2.5" fill="#7a4818"/>
+      <line x1="22" y1="62" x2="22" y2="57" stroke="#6a3808" strokeWidth="1.2" strokeLinecap="round"/>
+      {/* Paws holding acorn */}
+      <ellipse cx="16" cy="66" rx="5" ry="3.5" fill="#b06820"/>
+      <ellipse cx="28" cy="66" rx="5" ry="3.5" fill="#b06820"/>
+      {/* Alert brows */}
+      {alert && <>
+        <path d="M13,18 Q17,16 21,18" stroke="#1a0808" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+        <path d="M23,18 Q27,16 31,18" stroke="#1a0808" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+      </>}
+    </svg>
+  );
+}
+
+/* ── FROG ── */
+function FrogSVG({ alert, clicked }) {
+  return (
+    <svg viewBox="0 0 64 54" width="64" height="54" style={{ display:'block' }}>
+      {/* Body */}
+      <ellipse cx="32" cy="40" rx="26" ry="13" fill="#5a9a38"/>
+      <ellipse cx="32" cy="42" rx="18" ry="9" fill="#70b848" opacity="0.5"/>
+      {/* Belly */}
+      <ellipse cx="32" cy="44" rx="14" ry="7" fill="#c0e090" opacity="0.75"/>
+      {/* Back legs */}
+      <path d="M10,42 C6,46 2,50 6,52 C10,54 14,50 12,46" fill="#4a8828"/>
+      <path d="M54,42 C58,46 62,50 58,52 C54,54 50,50 52,46" fill="#4a8828"/>
+      {/* Webbed back feet */}
+      <path d="M4,51 Q6,48 8,51 Q10,48 12,51 Q10,53 6,53 Z" fill="#3a7818"/>
+      <path d="M52,51 Q54,48 56,51 Q58,48 60,51 Q58,53 54,53 Z" fill="#3a7818"/>
+      {/* Head */}
+      <ellipse cx="32" cy="28" rx="22" ry="17" fill="#5a9a38"/>
+      {/* Big eye bumps */}
+      <circle cx="14" cy="17" r={alert?10:8.5} fill="#5a9a38"/>
+      <circle cx="50" cy="17" r={alert?10:8.5} fill="#5a9a38"/>
+      {/* Eyes */}
+      <circle cx="14" cy="17" r={alert?8:6.5} fill="#1a0808"/>
+      <circle cx="14" cy="17" r={alert?6.5:5} fill="#48b028"/>
+      <circle cx="14" cy="17" r={alert?3.5:3} fill="#1a0808"/>
+      <circle cx="15.8" cy={alert?'14':'14.5'} r="2" fill="white" opacity="0.85"/>
+      <circle cx="13" cy="18" r="0.8" fill="white" opacity="0.4"/>
+      <circle cx="50" cy="17" r={alert?8:6.5} fill="#1a0808"/>
+      <circle cx="50" cy="17" r={alert?6.5:5} fill="#48b028"/>
+      <circle cx="50" cy="17" r={alert?3.5:3} fill="#1a0808"/>
+      <circle cx="51.8" cy={alert?'14':'14.5'} r="2" fill="white" opacity="0.85"/>
+      <circle cx="49" cy="18" r="0.8" fill="white" opacity="0.4"/>
+      {/* Nostrils */}
+      <circle cx="28" cy="28" r="2" fill="#3a7818"/>
+      <circle cx="36" cy="28" r="2" fill="#3a7818"/>
+      {/* Big grin */}
+      <path d="M12,35 Q32,46 52,35" stroke="#3a7818" strokeWidth="2" fill="none" strokeLinecap="round"/>
+      <path d="M12,35 Q32,42 52,35 Q52,37 32,47 Q12,37 12,35" fill="#b02828" opacity="0.7"/>
+      {/* Tongue */}
+      {!alert && <ellipse cx="32" cy="41" rx="5.5" ry="3" fill="#e04040" opacity="0.65"/>}
+      {/* Blush */}
+      <circle cx="20" cy="32" r="4" fill="#ffb0b0" opacity="0.35"/>
+      <circle cx="44" cy="32" r="4" fill="#ffb0b0" opacity="0.35"/>
+      {/* Front arms */}
+      <path d="M12,36 C8,40 8,44 12,46" stroke="#4a8828" strokeWidth="6" fill="none" strokeLinecap="round"/>
+      <path d="M52,36 C56,40 56,44 52,46" stroke="#4a8828" strokeWidth="6" fill="none" strokeLinecap="round"/>
+      {/* Webbed front feet */}
+      <path d="M8,46 Q10,43 12,46 Q14,43 16,46" stroke="#3a7818" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+      <path d="M48,46 Q50,43 52,46 Q54,43 56,46" stroke="#3a7818" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+      {/* Spots */}
+      <circle cx="26" cy="36" r="2.5" fill="#4a8828" opacity="0.4"/>
+      <circle cx="38" cy="34" r="2" fill="#4a8828" opacity="0.4"/>
+    </svg>
+  );
+}
+
+/* ── RACCOON ── */
+function RaccoonSVG({ alert, clicked }) {
+  return (
+    <svg viewBox="0 0 72 88" width="72" height="88" style={{ display:'block' }}>
+      {/* Striped ringed tail */}
+      <path d="M54,72 C66,58 70,44 66,30 C62,20 54,22 52,34 C50,44 52,58 54,72" fill="#909090"/>
+      <path d="M55,68 C65,56 68,44 65,32 C63,26 58,26 57,32 C56,42 55,56 55,68" fill="#383838" opacity="0.5"/>
+      <path d="M57,56 Q62,50 60,44" stroke="#585858" strokeWidth="1.5" fill="none" opacity="0.4"/>
+      <path d="M60,40 Q64,34 62,28" stroke="#585858" strokeWidth="1.5" fill="none" opacity="0.4"/>
+      <path d="M66,30 C70,24 72,26 70,32 C68,36 64,34 62,30" fill="#f0eae0"/>
+      {/* Body */}
+      <ellipse cx="32" cy="66" rx="22" ry="18" fill="#909090"/>
+      <ellipse cx="32" cy="70" rx="14" ry="12" fill="#b0b0b0" opacity="0.45"/>
+      {/* Belly */}
+      <ellipse cx="32" cy="72" rx="10" ry="8" fill="#f0eae0" opacity="0.65"/>
+      {/* Back legs */}
+      <ellipse cx="16" cy="82" rx="10" ry="6" fill="#686868" transform="rotate(-5 16 82)"/>
+      <ellipse cx="48" cy="82" rx="10" ry="6" fill="#686868" transform="rotate(5 48 82)"/>
+      {/* Front paws */}
+      <ellipse cx="14" cy="76" rx="8" ry="5" fill="#505050"/>
+      <ellipse cx="50" cy="76" rx="8" ry="5" fill="#505050"/>
+      <circle cx="11" cy="75" r="1.2" fill="#404040" opacity="0.5"/>
+      <circle cx="14" cy="74" r="1.2" fill="#404040" opacity="0.5"/>
+      <circle cx="17" cy="75" r="1.2" fill="#404040" opacity="0.5"/>
+      <circle cx="47" cy="74" r="1.2" fill="#404040" opacity="0.5"/>
+      <circle cx="50" cy="73" r="1.2" fill="#404040" opacity="0.5"/>
+      <circle cx="53" cy="74" r="1.2" fill="#404040" opacity="0.5"/>
+      {/* Head */}
+      <ellipse cx="32" cy="36" rx="20" ry="20" fill="#909090"/>
+      {/* Ears */}
+      <circle cx="16" cy="20" r="9" fill="#909090"/>
+      <circle cx="16" cy="20" r="6" fill="#505050"/>
+      <circle cx="16" cy="20" r="3.5" fill="#808080" opacity="0.5"/>
+      <circle cx="48" cy="20" r="9" fill="#909090"/>
+      <circle cx="48" cy="20" r="6" fill="#505050"/>
+      <circle cx="48" cy="20" r="3.5" fill="#808080" opacity="0.5"/>
+      {/* White face base */}
+      <ellipse cx="32" cy="38" rx="15" ry="14" fill="#f0eae0"/>
+      {/* Iconic raccoon mask */}
+      <path d="M14,30 Q20,26 26,28 Q28,31 32,31 Q36,31 38,28 Q44,26 50,30 Q48,38 44,38 Q40,38 38,34 Q36,32 32,32 Q28,32 26,34 Q24,38 20,38 Q16,38 14,30 Z" fill="#2a2a2a"/>
+      {/* White gap between eyes */}
+      <ellipse cx="32" cy="28" rx="4" ry="3" fill="#f0eae0"/>
+      {/* Eyes in mask */}
+      <circle cx="22" cy="32" r={alert?5:4} fill="#1a1a1a"/>
+      <circle cx="22" cy="32" r={alert?3.8:3} fill="#6090c0"/>
+      <circle cx="22" cy="32" r={alert?2.2:1.8} fill="#1a1a1a"/>
+      <circle cx="23.5" cy={alert?'29.5':'30'} r={alert?2:1.6} fill="white" opacity="0.85"/>
+      <circle cx="21" cy="32.5" r="0.7" fill="white" opacity="0.4"/>
+      <circle cx="42" cy="32" r={alert?5:4} fill="#1a1a1a"/>
+      <circle cx="42" cy="32" r={alert?3.8:3} fill="#6090c0"/>
+      <circle cx="42" cy="32" r={alert?2.2:1.8} fill="#1a1a1a"/>
+      <circle cx="43.5" cy={alert?'29.5':'30'} r={alert?2:1.6} fill="white" opacity="0.85"/>
+      <circle cx="41" cy="32.5" r="0.7" fill="white" opacity="0.4"/>
+      {/* Blush */}
+      <circle cx="18" cy="40" r="4" fill="#ffb0b0" opacity="0.35"/>
+      <circle cx="46" cy="40" r="4" fill="#ffb0b0" opacity="0.35"/>
+      {/* Muzzle */}
+      <ellipse cx="32" cy="43" rx="8" ry="5.5" fill="#f0eae0"/>
+      {/* Nose */}
+      <ellipse cx="32" cy="41" rx="3.2" ry="2.2" fill="#1a1a1a"/>
+      <ellipse cx="31" cy="40.5" rx="1" ry="0.6" fill="white" opacity="0.3"/>
+      {/* Forehead stripe */}
+      <path d="M28,24 L32,20 L36,24" stroke="#444444" strokeWidth="0.9" fill="none" opacity="0.4" strokeLinecap="round"/>
+      {/* Mouth */}
+      <path d="M28,45 Q32,49 36,45" stroke="#909090" strokeWidth="0.9" fill="none" strokeLinecap="round"/>
+      {/* Whiskers */}
+      <line x1="26" y1="42" x2="8" y2="39" stroke="#b0b0b0" strokeWidth="0.7" opacity="0.5"/>
+      <line x1="26" y1="44" x2="8" y2="47" stroke="#b0b0b0" strokeWidth="0.7" opacity="0.5"/>
+      <line x1="38" y1="42" x2="56" y2="39" stroke="#b0b0b0" strokeWidth="0.7" opacity="0.5"/>
+      <line x1="38" y1="44" x2="56" y2="47" stroke="#b0b0b0" strokeWidth="0.7" opacity="0.5"/>
+      {/* Alert brows */}
+      {alert && <>
+        <path d="M17,27 Q22,24 27,27" stroke="#1a1a1a" strokeWidth="2" fill="none" strokeLinecap="round"/>
+        <path d="M37,27 Q42,24 47,27" stroke="#1a1a1a" strokeWidth="2" fill="none" strokeLinecap="round"/>
+      </>}
+    </svg>
+  );
+}
+
 /* ── MAIN COMPONENT ── */
 export default function RareGuest({ type, state, countdown, onClick }) {
   if (!type) return null;
@@ -565,7 +835,7 @@ export default function RareGuest({ type, state, countdown, onClick }) {
               fontSize: 11, fontFamily: "'Fraunces',Georgia,serif",
               fontStyle: 'italic', color: '#2d2418',
             }}>
-              {type==='fox'?'Still there?':type==='owl'?'Who...?':type==='bear'?'Hmm?':type==='deer'?'*looks up*':type==='rabbit'?'*wiggles nose*':'...'}
+              {{fox:'Still there?',owl:'Who...?',bear:'Hmm?',deer:'*looks up*',rabbit:'*wiggles nose*',cat:'...',hedgehog:'*sniffs air*',squirrel:'Ooh, a nut!',frog:'Ribbit!',raccoon:'Ooh shiny!'}[type]??'...'}
             </span>
             <svg width="22" height="22" viewBox="0 0 22 22">
               <circle cx="11" cy="11" r="9" fill="none" stroke="rgba(45,36,24,0.1)" strokeWidth="2"/>
@@ -605,12 +875,16 @@ export default function RareGuest({ type, state, countdown, onClick }) {
         )}
 
         {/* Animal SVG */}
-        {type==='rabbit' && <RabbitSVG alert={isAlert} clicked={isClicked}/>}
-        {type==='fox'    && <FoxSVG  alert={isAlert} clicked={isClicked}/>}
-        {type==='owl'    && <OwlSVG  alert={isAlert} clicked={isClicked}/>}
-        {type==='deer'   && <DeerSVG alert={isAlert} clicked={isClicked}/>}
-        {type==='bear'   && <BearSVG alert={isAlert} clicked={isClicked}/>}
-        {type==='cat'    && <CatSVG  alert={isAlert} clicked={isClicked}/>}
+        {type==='rabbit'   && <RabbitSVG   alert={isAlert} clicked={isClicked}/>}
+        {type==='fox'      && <FoxSVG      alert={isAlert} clicked={isClicked}/>}
+        {type==='owl'      && <OwlSVG      alert={isAlert} clicked={isClicked}/>}
+        {type==='deer'     && <DeerSVG     alert={isAlert} clicked={isClicked}/>}
+        {type==='bear'     && <BearSVG     alert={isAlert} clicked={isClicked}/>}
+        {type==='cat'      && <CatSVG      alert={isAlert} clicked={isClicked}/>}
+        {type==='hedgehog' && <HedgehogSVG alert={isAlert} clicked={isClicked}/>}
+        {type==='squirrel' && <SquirrelSVG alert={isAlert} clicked={isClicked}/>}
+        {type==='frog'     && <FrogSVG     alert={isAlert} clicked={isClicked}/>}
+        {type==='raccoon'  && <RaccoonSVG  alert={isAlert} clicked={isClicked}/>}
       </div>
 
       <style>{`
@@ -743,6 +1017,73 @@ export default function RareGuest({ type, state, countdown, onClick }) {
           0%   { opacity: 0; transform: translateX(-50%) translateY(0) scale(0.8); }
           20%  { opacity: 1; transform: translateX(-50%) translateY(-8px) scale(1); }
           100% { opacity: 0; transform: translateX(-50%) translateY(-48px) scale(1.04); }
+        }
+
+        /* ── Hedgehog: slow sniff waddle ── */
+        @keyframes hedgehogSniff {
+          0%,100% { transform: translateY(0) rotate(0deg); }
+          20%     { transform: translateY(-2px) rotate(-1deg); }
+          35%     { transform: translateY(-1px) rotate(0deg) scaleX(0.97); }
+          50%     { transform: translateY(-3px) rotate(1deg); }
+          70%     { transform: translateY(-2px) rotate(-0.5deg) scaleX(1.02); }
+          85%     { transform: translateY(-1px) rotate(0.5deg); }
+        }
+        @keyframes hedgehogScurry {
+          0%   { transform: translateX(0); opacity: 1; }
+          20%  { transform: translateX(20px) translateY(-4px); opacity: 1; }
+          45%  { transform: translateX(70px) translateY(0); opacity: 1; }
+          70%  { transform: translateX(140px) translateY(-3px); opacity: 0.7; }
+          100% { transform: translateX(240px); opacity: 0; }
+        }
+
+        /* ── Squirrel: quick twitchy ── */
+        @keyframes squirrelTwitch {
+          0%,100% { transform: translateY(0) rotate(0deg); }
+          8%      { transform: translateY(-3px) rotate(-3deg); }
+          16%     { transform: translateY(-1px) rotate(2deg); }
+          25%     { transform: translateY(-5px) rotate(-1.5deg); }
+          35%     { transform: translateY(-3px) rotate(1.5deg); }
+          50%     { transform: translateY(-6px) rotate(-0.5deg); }
+          65%     { transform: translateY(-4px) rotate(1deg); }
+          80%     { transform: translateY(-1px) rotate(0deg); }
+        }
+        @keyframes squirrelDash {
+          0%   { transform: translateX(0) scaleX(1); opacity: 1; }
+          15%  { transform: translateX(20px) scaleX(-1); opacity: 1; }
+          35%  { transform: translateX(80px) scaleX(-1) translateY(-15px); opacity: 1; }
+          55%  { transform: translateX(160px) scaleX(-1) translateY(0); opacity: 0.7; }
+          100% { transform: translateX(300px) scaleX(-1); opacity: 0; }
+        }
+
+        /* ── Frog: gentle bob ── */
+        @keyframes frogBob {
+          0%,100% { transform: translateY(0) scaleY(1); }
+          25%     { transform: translateY(-4px) scaleY(1.02); }
+          50%     { transform: translateY(-6px) scaleY(1); }
+          75%     { transform: translateY(-3px) scaleY(1.01); }
+        }
+        @keyframes frogJump {
+          0%   { transform: translateX(0) translateY(0) scaleY(1); opacity: 1; }
+          18%  { transform: translateX(-10px) translateY(-50px) scaleY(1.1); opacity: 1; }
+          32%  { transform: translateX(25px) translateY(0) scaleY(0.9); opacity: 1; }
+          52%  { transform: translateX(60px) translateY(-45px) scaleY(1.1); opacity: 0.85; }
+          70%  { transform: translateX(120px) translateY(0) scaleY(0.9); opacity: 0.5; }
+          100% { transform: translateX(200px) translateY(-20px); opacity: 0; }
+        }
+
+        /* ── Raccoon: curious rocking ── */
+        @keyframes raccoonIdle {
+          0%,100% { transform: translateY(0) rotate(0deg); }
+          20%     { transform: translateY(-3px) rotate(-1.5deg); }
+          40%     { transform: translateY(-5px) rotate(0.5deg); }
+          55%     { transform: translateY(-4px) rotate(1.5deg); }
+          75%     { transform: translateY(-2px) rotate(-0.5deg); }
+        }
+        @keyframes raccoonSlink {
+          0%   { transform: translateX(0) rotate(0deg); opacity: 1; }
+          30%  { transform: translateX(30px) rotate(-3deg) translateY(-8px); opacity: 1; }
+          60%  { transform: translateX(110px) rotate(2deg) translateY(0); opacity: 0.7; }
+          100% { transform: translateX(240px) rotate(5deg); opacity: 0; }
         }
       `}</style>
     </>
